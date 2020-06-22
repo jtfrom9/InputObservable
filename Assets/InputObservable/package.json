@@ -1,20 +1,14 @@
 {
     "name": "com.jtfrom9.input-observable",
-    "displayName": "InputObservable",
+    "displayName": "Input Observable",
     "version": "0.1.0",
     "unity": "2019.4",
     "description": "Input Handling Utility with UniRx",
     "dependencies": {
-        "com.neuecc.unirx": "7.1.0"
+        "com.neuecc.unirx": "https://github.com/neuecc/UniRx.git?path=Assets/Plugins/UniRx/Scripts"
     },
-    "scopedRegistries": [
-        {
-            "name": "package.openupm.com",
-            "url": "https://package.openupm.com",
-            "scopes": [
-                "com.neuecc.unirx",
-                "com.openupm"
-            ]
-        }
-    ]
+    "author": {
+        "name": "jtfrom9",
+        "email": "jun.tachikawa@gmail.com"
+    }
 }
