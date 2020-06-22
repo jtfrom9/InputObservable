@@ -1,5 +1,5 @@
 {
-    "name": "Test",
+    "name": "InputObservable.Example",
     "references": [
         "GUID:560b04d1a97f54a4e82edc0cbbb69285",
         "GUID:e1e8b35632fca4351b739021eee33dbe"
