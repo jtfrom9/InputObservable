@@ -31,10 +31,12 @@ namespace InputObservable
                         beginPos = touch.position;
                         var e = new InputEvent()
                         {
+                            sequenceId = this.sequenceId,
                             id = this.id,
                             type = InputEventType.Begin,
                             position = touch.position
                         };
+                        this.id++;
                         beginStream.OnNext(e);
                     }
                     break;
@@ -44,10 +46,12 @@ namespace InputObservable
                             return;
                         var e = new InputEvent()
                         {
+                            sequenceId = this.sequenceId,
                             id = this.id,
                             type = InputEventType.Move,
                             position = touch.position
                         };
+                        this.id++;
                         moveStream.OnNext(e);
                     }
                     break;
@@ -58,12 +62,14 @@ namespace InputObservable
                         begin = false;
                         var e = new InputEvent()
                         {
+                            sequenceId = this.sequenceId,
                             id = this.id,
                             type = InputEventType.End,
                             position = touch.position
                         };
+                        this.id = 0;
                         endStream.OnNext(e);
-                        this.id++;
+                        this.sequenceId++;
                     }
                     break;
                 default:

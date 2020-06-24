@@ -32,10 +32,12 @@ namespace InputObservable
                 beginPos = Input.mousePosition;
                 var e = new InputEvent()
                 {
+                    sequenceId = this.sequenceId,
                     id = this.id,
                     type = InputEventType.Begin,
                     position = Input.mousePosition
                 };
+                this.id++;
                 beginStream.OnNext(e);
             }
             else if (Input.GetMouseButtonUp(buttonId))
@@ -47,12 +49,14 @@ namespace InputObservable
                 begin = false;
                 var e = new InputEvent()
                 {
+                    sequenceId = this.sequenceId,
                     id = this.id,
                     type = InputEventType.End,
                     position = Input.mousePosition
                 };
+                this.id = 0;
                 endStream.OnNext(e);
-                this.id++;
+                this.sequenceId++;
             }
             else
             {
@@ -61,10 +65,12 @@ namespace InputObservable
                     beginPos = Input.mousePosition;
                     var e = new InputEvent()
                     {
+                        sequenceId = this.sequenceId,
                         id = this.id,
                         type = InputEventType.Move,
                         position = Input.mousePosition,
                     };
+                    this.id++;
                     moveStream.OnNext(e);
                 }
             }
