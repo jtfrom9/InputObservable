@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "com.jtfrom9.miguel12345.unity-shapes": "https://github.com/jtfrom9/UnityShapes.git?path=Assets/Shapes",
+    "com.neuecc.unirx": "7.1.0",
     "com.unity.collab-proxy": "1.2.16",
     "com.unity.ide.rider": "1.1.4",
     "com.unity.ide.vscode": "1.2.0",
@@ -37,8 +39,7 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0",
-    "com.neuecc.unirx": "7.1.0"
+    "com.unity.modules.xr": "1.0.0"
   },
   "scopedRegistries": [
     {
@@ -49,5 +50,11 @@
         "com.openupm"
       ]
     }
-  ]
+  ],
+  "lock": {
+    "com.jtfrom9.miguel12345.unity-shapes": {
+      "revision": "HEAD",
+      "hash": "2c6216222c08d586b5a16ba76308497208b7beb8"
+    }
+  }
 }

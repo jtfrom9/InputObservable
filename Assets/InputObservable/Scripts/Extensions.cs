@@ -27,36 +27,16 @@ namespace InputObservable
             return Observable.Merge(io.Begin, io.Move, io.End);
         }
 
-        public static IObservable<IList<InputEvent>> Sequence(this IInputObservable io)
+        public static IObservable<InputEvent> Any(this IInputObservable io, double interval)
         {
-            return io.Any().Buffer(io.End);
-        }
-
-        public static IObservable<IList<TimeInterval<InputEvent>>> SequenceTimeInterval(this IInputObservable io)
-        {
-            return io.Any().TimeInterval().Buffer(io.End);
+            return Observable.Merge(io.Begin,
+                io.Move.ThrottleFirst(TimeSpan.FromMilliseconds(interval)),
+                io.End);
         }
 
         public static IObservable<InputEvent> MoveThrottle(this IInputObservable io, double interval)
         {
             return io.Move.ThrottleFirst(TimeSpan.FromMilliseconds(interval));
-        }
-
-        public static IObservable<IList<InputEvent>> MoveThrottleAny(this IInputObservable io, double interval)
-        {
-            return Observable.Merge(io.Begin,
-                io.Move.ThrottleFirst(TimeSpan.FromMilliseconds(interval)),
-                io.End)
-                .Buffer(io.End);
-        }
-
-        public static IObservable<IList<TimeInterval<InputEvent>>> MoveThrottleAnyTimeInterval(this IInputObservable io, double interval)
-        {
-            return Observable.Merge(io.Begin,
-                io.Move.ThrottleFirst(TimeSpan.FromMilliseconds(interval)),
-                io.End)
-                .TimeInterval()
-                .Buffer(io.End);
         }
 
         public static IObservable<InputEvent> Double(this IInputObservable io, double interval)
@@ -79,58 +59,64 @@ namespace InputObservable
                 .RepeatUntilDestroy(io.gameObject);
         }
 
-        public static IObservable<IList<Vector2>> Verocity(this IInputObservable io, double interval)
+        public static IObservable<IList<TimeInterval<InputEvent>>> MoveThrottleAnyTimeIntervalSequence(this IInputObservable io, double interval)
         {
-            return io.MoveThrottleAnyTimeInterval(interval).Select(sequence =>
+            return Observable.Merge(io.Begin,
+                io.Move.ThrottleFirst(TimeSpan.FromMilliseconds(interval)),
+                io.End)
+                .TimeInterval()
+                .Buffer(io.End);
+        }
+
+        public static IObservable<IList<TimeInterval<InputEvent>>> TakeBeforeEndTimeInterval(this IInputObservable io, int count)
+        {
+            return io.Any().TakeUntil(io.End.DelayFrame(1))
+                .TimeInterval()
+                .TakeLast(count)
+                .Buffer(count)
+                .RepeatUntilDestroy(io.gameObject);
+        }
+    }
+
+    public static class IInputListObservableExtension
+    {
+        public static IObservable<IList<InputEvent>> IgnoreSubtle(this IObservable<IList<InputEvent>> events, float delta)
+        {
+            return events.Where(list =>
             {
-                var verocities = new List<Vector2>();
+                return list[1].type == InputEventType.End ||
+                    (Mathf.Abs(list[0].position.x - list[1].position.x) > delta &&
+                    Mathf.Abs(list[0].position.y - list[1].position.y) > delta);
+            });
+        }
+    }
+
+    public static class IInputTimeListObservableExtension
+    {
+        public static IObservable<IList<VerocityInfo>> Verocity(this IObservable<IList<TimeInterval<InputEvent>>> timeSeqIo)
+        {
+            return timeSeqIo.Select(sequence =>
+            {
+                var verocities = new List<VerocityInfo>();
                 var prev = sequence.First();
                 for (int i = 1; i < sequence.Count; i++)
                 {
                     var t = sequence[i];
-                    // var diff = t.Interval.TotalMilliseconds - prev.Interval.TotalMilliseconds;
                     var diff = t.Interval.TotalMilliseconds;
-                    verocities.Add(new Vector2()
+                    verocities.Add(new VerocityInfo()
                     {
-                        x = (float)((t.Value.position.x - prev.Value.position.x) / diff),
-                        y = (float)((t.Value.position.y - prev.Value.position.y) / diff),
+                        @event = prev.Value,
+                        vector = new Vector2()
+                        {
+                            x = (float)((t.Value.position.x - prev.Value.position.x) / diff),
+                            y = (float)((t.Value.position.y - prev.Value.position.y) / diff),
+                        }
                     });
-                    // Debug.Log($"diff={diff}, {t.Value.position}@{t.Interval.TotalMilliseconds} - {prev.Value.position}@{t.Interval.TotalMilliseconds}");
                     prev = t;
                 }
                 return verocities;
             });
         }
-    }
 
-    public static class IInputObservableListExtension
-    {
-        public static IObservable<IList<Vector2>> BeginEndVerocity(this IObservable<IList<InputEvent>> seqio)
-        {
-            return seqio.Select(sequence =>
-            {
-                var begin = sequence.First();
-                var end = sequence.Last();
-                var diffx = end.position.x - begin.position.x;
-                var diffy = end.position.y - begin.position.y;
-                var ret = new List<Vector2>() { begin.position };
-                if (Math.Abs(diffx) >= 0.1f || Math.Abs(diffy) >= 0.1f)
-                {
-                    ret.Add(Vector2.right * diffx + Vector2.up * diffy);
-                }
-                return ret;
-            });
-        }
-
-        // public static IObservable<IList<Vector2>> Verocity(this IObservable<IList<TimeInterval<InputEvent>>> sequenceTimeInterval)
-        // {
-        //     sequenceTimeInterval.Select(sequence => {
-        //         var verocities = new List<Vector2>();
-        //         foreach(var t in sequence) {
-        //             var x = t.Interval;
-        //             var id = t.Value.id;
-        //         }
-        //     });
-        // }
     }
 }

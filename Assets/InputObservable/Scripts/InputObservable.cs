@@ -16,10 +16,18 @@ namespace InputObservable
 
     public struct InputEvent
     {
+        public long sequenceId;
         public long id;
         public InputEventType type;
         public Vector2 position;
-        public override string ToString() { return $"({id},{type},{position})"; }
+        public override string ToString() { return $"({sequenceId}.{id},{type},{position})"; }
+    }
+
+    public struct VerocityInfo
+    {
+        public InputEvent @event;
+        public Vector2 vector;
+        public override string ToString() { return $"<{@event},{vector}>"; }
     }
 
     public interface IInputObservable
@@ -33,6 +41,7 @@ namespace InputObservable
     public abstract class InputObservableBase : IInputObservable, IDisposable
     {
         MonoBehaviour behaviour;
+        protected long sequenceId = 0;
         protected long id = 0;
         protected bool begin = false;
         protected Vector2 beginPos = Vector2.zero;
