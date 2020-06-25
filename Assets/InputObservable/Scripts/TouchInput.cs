@@ -23,6 +23,10 @@ namespace InputObservable
             {
                 case TouchPhase.Began:
                     {
+                        if(begin) {
+                            Debug.LogError("invalid Begin");
+                            return;
+                        }
                         if (eventSystem!=null && eventSystem.IsPointerOverGameObject(touch.fingerId))
                         {
                             return;
