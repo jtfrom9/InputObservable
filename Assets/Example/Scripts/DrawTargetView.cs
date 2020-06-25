@@ -42,7 +42,7 @@ public class DrawTargetView : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.ScreenPointToRay(e.position), out hit))
         {
-            dragList[e.sequenceId] = new GameObject($"{e.sequenceId}");
+            dragList[e.sequenceId] = new GameObject($"{e.sender}-{e.sequenceId}");
 
             var view = Instantiate(dragCubePrefab, hit.point, Quaternion.identity).GetComponent<DragCubeView>();
             Destroy(view.gameObject.GetComponent<LineRenderer>()); // Remove LineRnederer for first point.

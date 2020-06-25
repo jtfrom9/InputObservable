@@ -9,7 +9,6 @@ using InputObservable;
 public class TestMain : MonoBehaviour
 {
     public DrawTargetView draw;
-    public GameObject cube;
     public UICanvasView ui;
 
     List<IDisposable> disposables = new List<IDisposable>();
@@ -200,13 +199,6 @@ public class TestMain : MonoBehaviour
     void Start()
     {
         var io = this.DefaultInputObservable();
-        var mw = io as MouseInputObservable;
-        if(mw!=null) {
-            mw.Wheel.Subscribe(e => {
-                // log(e.wheel);
-                cube.transform.Translate(Vector3.forward * e.wheel);
-            }).AddTo(this);
-        }
 
         ui.SelectedToggle.Subscribe(type =>
         {

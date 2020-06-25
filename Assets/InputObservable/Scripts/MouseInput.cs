@@ -99,6 +99,4 @@ namespace InputObservable
             this.eventSystem = eventSystem;
         }
     }
-
-
 }
