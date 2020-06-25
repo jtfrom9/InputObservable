@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -34,15 +35,17 @@ public class TouchSpecificTest : MonoBehaviour
 
     void Start()
     {
-        // var default = new TouchInputObservable(this, 0, null);
-        this.DefaultInputObservable(0).Any().Subscribe(touchDrawHandler(Color.green));
-        this.DefaultInputObservable(1).Any().Subscribe(touchDrawHandler(Color.yellow));
-        this.DefaultInputObservable(2).Any().Subscribe(touchDrawHandler(Color.gray));
-        this.DefaultInputObservable(3).Any().Subscribe(touchDrawHandler(Color.gray));
-        this.DefaultInputObservable(4).Any().Subscribe(touchDrawHandler(Color.gray));
+        var ios = new List<IInputObservable>();
+        var colors = new List<Color> { Color.green, Color.yellow, Color.gray, Color.gray, Color.gray};
+        foreach(var (index,color) in colors.Select((color,index) => (index,color))) {
+            var io = this.DefaultInputObservable(index);
+            io.Any().Subscribe(touchDrawHandler(color)).AddTo(this);
+            ios.Add(io);
+        }
 
-        var ro = RectangleObservable.From(this.DefaultInputObservable(0), this.DefaultInputObservable(1));
-        ro.Subscribe(rect => {
+        var ro = RectangleObservable.From(ios[0], ios[1]);
+        ro.Subscribe(rect =>
+        {
             Debug.Log($"Rect: {rect}");
             text.text = rect.ToString();
         }).AddTo(this);
