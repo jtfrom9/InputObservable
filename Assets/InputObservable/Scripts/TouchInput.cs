@@ -14,7 +14,7 @@ namespace InputObservable
 
         protected override void Update()
         {
-            if (Input.touchCount == 0)
+            if (Input.touchCount < this.index + 1)
             {
                 return;
             }

@@ -1,0 +1,32 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UniRx;
+using UniRx.Triggers;
+
+namespace InputObservable
+{
+    public static class RectangleObservable
+    {
+        public static IObservable<Rect> From(IInputObservable io1, IInputObservable io2)
+        {
+            var end = Observable.Merge(io1.End, io2.End);
+            return Observable.CombineLatest(io1.Any(), io2.Any())
+                .TakeUntil(end)
+                .RepeatUntilDestroy(io1.gameObject)
+                // .Do(es => {
+                //     Debug.Log($"****** count={es.Count}");
+                // })
+                .Select(es =>
+                {
+                    var x = Mathf.Min(es[0].position.x, es[1].position.x);
+                    var y = Mathf.Min(es[0].position.y, es[1].position.y);
+                    return new Rect(x, y,
+                        Mathf.Abs(es[0].position.x - es[1].position.x),
+                        Mathf.Abs(es[0].position.y - es[1].position.y));
+                })
+                .DistinctUntilChanged();
+        }
+    }
+ }
