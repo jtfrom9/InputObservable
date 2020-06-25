@@ -12,6 +12,8 @@ public class DrawTargetView : MonoBehaviour
     Dictionary<long, GameObject> dragList = new Dictionary<long, GameObject>();
     Vector3 last;
 
+    Dictionary<IInputObservable, GameObject> cross = new Dictionary<IInputObservable, GameObject>();
+
     public void Put(InputEvent e, Color color, string msg = null)
     {
         RaycastHit hit;
@@ -21,6 +23,41 @@ public class DrawTargetView : MonoBehaviour
             if (!string.IsNullOrEmpty(msg))
                 view.SetText(msg);
             view.SetColor(color);
+        }
+    }
+
+    public void NewCross(InputEvent e, Color color)
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(e.position), out hit))
+        {
+            var view = Instantiate(pointPrefab, hit.point, Quaternion.identity).GetComponent<PointView>();
+            view.SetCross(color);
+            cross[e.sender] = view.gameObject;
+        }
+    }
+
+    public void MoveCross(InputEvent e)
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(e.position), out hit))
+        {
+            if(hit.collider.gameObject!=gameObject) {
+                return;
+            }
+            if (cross.ContainsKey(e.sender))
+            {
+                cross[e.sender].transform.position = hit.point;
+            }
+        }
+    }
+
+    public void EndCross(InputEvent e)
+    {
+        if (cross.ContainsKey(e.sender))
+        {
+            Destroy(cross[e.sender]);
+            cross.Remove(e.sender);
         }
     }
 

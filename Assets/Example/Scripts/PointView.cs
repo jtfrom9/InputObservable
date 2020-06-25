@@ -9,6 +9,9 @@ public class PointView : MonoBehaviour
     MeshRenderer meshRenderer;
     bool vector = false;
     LineInfo vecInfo;
+    bool cross = false;
+    LineInfo line1;
+    LineInfo line2;
 
     public void SetText(string txt)
     {
@@ -37,6 +40,30 @@ public class PointView : MonoBehaviour
         };
     }
 
+    public void SetCross(Color color)
+    {
+        cross = true;
+        var X = transform.position.x;
+        var Y = transform.position.y;
+        var Z = transform.position.z;
+        line1 = new LineInfo()
+        {
+            startPos = new Vector3(-100, Y, Z),
+            endPos = new Vector3(100, Y, Z),
+            width = 0.03f,
+            fillColor = color,
+            forward = Camera.main.transform.forward,
+        };
+        line2 = new LineInfo()
+        {
+            startPos = new Vector3(X, -100, Z),
+            endPos = new Vector3(X, 100, Z),
+            width = 0.03f,
+            fillColor = color,
+            forward = Camera.main.transform.forward,
+        };
+    }
+
     void Awake()
     {
         meshRenderer = GetComponent<MeshRenderer>();
@@ -44,13 +71,22 @@ public class PointView : MonoBehaviour
 
     void Start()
     {
-        Destroy(gameObject, 3.0f);
+        if(!cross)
+            Destroy(gameObject, 3.0f);
     }
 
     void Update()
     {
         if(vector) {
             LineSegment.Draw(vecInfo);
+        }
+        if(cross) {
+            line1.startPos.y = transform.position.y;
+            line1.endPos.y = transform.position.y;
+            LineSegment.Draw(line1);
+            line2.startPos.x = transform.position.x;
+            line2.endPos.x = transform.position.x;
+            LineSegment.Draw(line2);
         }
     }
 }
