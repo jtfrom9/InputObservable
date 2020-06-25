@@ -34,7 +34,8 @@ namespace InputObservable
                             sequenceId = this.sequenceId,
                             id = this.id,
                             type = InputEventType.Begin,
-                            position = touch.position
+                            position = touch.position,
+                            sender = this
                         };
                         this.id++;
                         beginStream.OnNext(e);
@@ -49,7 +50,8 @@ namespace InputObservable
                             sequenceId = this.sequenceId,
                             id = this.id,
                             type = InputEventType.Move,
-                            position = touch.position
+                            position = touch.position,
+                            sender = this
                         };
                         this.id++;
                         moveStream.OnNext(e);
@@ -65,7 +67,8 @@ namespace InputObservable
                             sequenceId = this.sequenceId,
                             id = this.id,
                             type = InputEventType.End,
-                            position = touch.position
+                            position = touch.position,
+                            sender = this
                         };
                         this.id = 0;
                         endStream.OnNext(e);
@@ -75,6 +78,11 @@ namespace InputObservable
                 default:
                     break;
             }
+        }
+
+        public override string ToString()
+        {
+            return $"Touch({this.index})";
         }
 
         public TouchInputObservable(MonoBehaviour behaviour, int index, EventSystem eventSystem) : base(behaviour)

@@ -20,7 +20,8 @@ namespace InputObservable
         public long id;
         public InputEventType type;
         public Vector2 position;
-        public override string ToString() { return $"({sequenceId}.{id},{type},{position})"; }
+        public IInputObservable sender;
+        public override string ToString() { return $"[{sender}]({sequenceId}.{id},{type},{position})"; }
     }
 
     public struct VerocityInfo

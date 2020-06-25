@@ -35,7 +35,8 @@ namespace InputObservable
                     sequenceId = this.sequenceId,
                     id = this.id,
                     type = InputEventType.Begin,
-                    position = Input.mousePosition
+                    position = Input.mousePosition,
+                    sender = this
                 };
                 this.id++;
                 beginStream.OnNext(e);
@@ -52,7 +53,8 @@ namespace InputObservable
                     sequenceId = this.sequenceId,
                     id = this.id,
                     type = InputEventType.End,
-                    position = Input.mousePosition
+                    position = Input.mousePosition,
+                    sender = this
                 };
                 this.id = 0;
                 endStream.OnNext(e);
@@ -69,6 +71,7 @@ namespace InputObservable
                         id = this.id,
                         type = InputEventType.Move,
                         position = Input.mousePosition,
+                        sender = this
                     };
                     this.id++;
                     moveStream.OnNext(e);
@@ -83,6 +86,11 @@ namespace InputObservable
                     wheel = wheel
                 });
             }
+        }
+
+        public override string ToString()
+        {
+            return $"Mouse({this.buttonId})";
         }
 
         public MouseInputObservable(MonoBehaviour behaviour, int buttonId, EventSystem eventSystem) : base(behaviour)
