@@ -28,8 +28,12 @@ namespace InputObservable
                 {
                     return;
                 }
-                begin = true;
                 beginPos = Input.mousePosition;
+                if (beginPos.x < 0 || beginPos.y < 0 || beginPos.x >= Screen.width || beginPos.y >= Screen.height)
+                {
+                    return;
+                }
+                begin = true;
                 var e = new InputEvent()
                 {
                     sequenceId = this.sequenceId,
