@@ -51,10 +51,10 @@ namespace InputObservable
         protected Subject<InputEvent> endStream = new Subject<InputEvent>();
         protected Subject<InputEvent> moveStream = new Subject<InputEvent>();
 
-        GameObject IInputObservable.gameObject { get => behaviour.gameObject; }
-        IObservable<InputEvent> IInputObservable.Begin { get => beginStream; }
-        IObservable<InputEvent> IInputObservable.End { get => endStream; }
-        IObservable<InputEvent> IInputObservable.Move { get => moveStream; }
+        public GameObject gameObject { get => behaviour.gameObject; }
+        public IObservable<InputEvent> Begin { get => beginStream; }
+        public IObservable<InputEvent> End { get => endStream; }
+        public IObservable<InputEvent> Move { get => moveStream; }
 
         protected abstract void Update();
 

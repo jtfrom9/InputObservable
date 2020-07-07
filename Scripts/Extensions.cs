@@ -81,6 +81,41 @@ namespace InputObservable
                 .Buffer(count)
                 .RepeatUntilDestroy(io.gameObject);
         }
+
+        public static IObservable<Vector3> AsRotate(this IInputObservable io, Vector2 maxRotate)
+        {
+            return io.Any().TakeUntil(io.End.DelayFrame(1)).Buffer(2, 1)
+            .Where(events => events.Count > 1)
+            .RepeatUntilDestroy(io.gameObject)
+            .Select(events =>
+            {
+                // if (events.Count > 1)
+                // {
+                //     Debug.Log($"<color=blue>{events[0]}, {events[1]}</color>");
+                // }
+                // else
+                // {
+                //     Debug.Log($"<color=blue>{events[0]}");
+                // }
+                var diffx = events[1].position.x - events[0].position.x;
+                var diffy = events[1].position.y - events[0].position.y;
+                return new Vector3()
+                {
+                    x = -maxRotate.y / Screen.height * diffy, // axis X
+                    y = maxRotate.x / Screen.width * diffx, // axis Y
+                    z = 0
+                };
+            });
+        }
+
+        public static IObservable<Vector3> AsRotate(this IInputObservable io, float horizontal_degree, float vertical_degree)
+        {
+            return AsRotate(io, new Vector2()
+            {
+                x = horizontal_degree,
+                y = vertical_degree,
+            });
+        }
     }
 
     public static class IInputListObservableExtension
