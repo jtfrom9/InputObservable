@@ -36,8 +36,9 @@ public class TouchSpecificTest : MonoBehaviour
     void Start()
     {
         var ios = new List<IInputObservable>();
-        var colors = new List<Color> { Color.green, Color.yellow, Color.gray, Color.gray, Color.gray};
-        foreach(var (index,color) in colors.Select((color,index) => (index,color))) {
+        var colors = new List<Color> { Color.green, Color.yellow, Color.gray, Color.gray, Color.gray };
+        foreach (var (index, color) in colors.Select((color, index) => (index, color)))
+        {
             var io = this.DefaultInputObservable(index);
             io.Any().Subscribe(touchDrawHandler(color)).AddTo(this);
             ios.Add(io);
@@ -50,21 +51,27 @@ public class TouchSpecificTest : MonoBehaviour
             text.text = rect.ToString();
         }).AddTo(this);
 
+        ios[0].End.Subscribe(_ =>
+        {
+            text2.text = "";
+        }).AddTo(this);
+
         // Pinch In/Out Detection
-        ro.Buffer(2, 1).ThrottleFirst(TimeSpan.FromMilliseconds(100f)).Subscribe(rects => {
-            var diffh = rects[1].width - rects[0].width;
-            var diffv = rects[1].height - rects[0].height;
-            Debug.Log($"Horizontal: {diffh}, Vertical: {diffv}");
-            if(diffh < 0 && diffv < 0)
-            {
-                text2.text = $"<color=blue>Pinch-In ({diffh},{diffv})</color>";
-            } else if (diffh > 0 && diffv > 0)
-            {
-                text2.text = $"<color=red>Pinch-Out ({diffh},{diffv})</color>";
-            } else 
-            {
-                text2.text = "?";
-            }
+        ro.PinchSequence().Subscribe(diff =>
+        {
+            Debug.Log($"Horizontal: {diff.x}, Vertical: {diff.y}");
+            string th = "";
+            string tv="";
+
+            if(diff.x <0) th = $"<color=red>dX={diff.x}</color>";
+            else if(diff.x >0) th=$"<color=blue>dX={diff.x}</color>";
+            else th = $"{diff.x}";
+
+            if (diff.y < 0) tv = $"<color=red>dY={diff.y}</color>";
+            else if (diff.y > 0) tv = $"<color=blue>dY={diff.y}</color>";
+            else tv = $"{diff.x}";
+
+            text2.text = $"{th}, {tv}";
         }).AddTo(this);
     }
 }
