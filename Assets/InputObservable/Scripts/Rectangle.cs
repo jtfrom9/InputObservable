@@ -14,7 +14,6 @@ namespace InputObservable
             var end = Observable.Merge(io1.End, io2.End);
             return Observable.CombineLatest(io1.Any(), io2.Any())
                 .TakeUntil(end)
-                .RepeatUntilDestroy(io1.gameObject)
                 .Select(es =>
                 {
                     var x = Mathf.Min(es[0].position.x, es[1].position.x);
@@ -32,6 +31,7 @@ namespace InputObservable
         public static IObservable<Vector2> PinchSequence(this IObservable<Rect> ro)
         {
             return ro.Buffer(2, 1)
+                .Where(rects => rects.Count > 1)
                 .Select(rects =>
                 {
                     var diffh = rects[1].width - rects[0].width;

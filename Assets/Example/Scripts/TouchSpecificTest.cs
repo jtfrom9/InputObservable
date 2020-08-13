@@ -45,33 +45,32 @@ public class TouchSpecificTest : MonoBehaviour
         }
 
         var ro = RectangleObservable.From(ios[0], ios[1]);
-        ro.Subscribe(rect =>
+        ro.DoOnCompleted(() => {
+            text2.text = "";
+        }).RepeatUntilDestroy(this).Subscribe(rect =>
         {
             Debug.Log($"Rect: {rect}");
             text.text = rect.ToString();
         }).AddTo(this);
 
-        ios[0].End.Subscribe(_ =>
-        {
-            text2.text = "";
-        }).AddTo(this);
-
         // Pinch In/Out Detection
-        ro.PinchSequence().Subscribe(diff =>
-        {
-            Debug.Log($"Horizontal: {diff.x}, Vertical: {diff.y}");
-            string th = "";
-            string tv="";
+        ro.PinchSequence()
+            .RepeatUntilDestroy(this)
+            .Subscribe(diff =>
+            {
+                Debug.Log($"Horizontal: {diff.x}, Vertical: {diff.y}");
+                string th = "";
+                string tv = "";
 
-            if(diff.x <0) th = $"<color=red>dX={diff.x}</color>";
-            else if(diff.x >0) th=$"<color=blue>dX={diff.x}</color>";
-            else th = $"{diff.x}";
+                if (diff.x < 0) th = $"<color=red>dX={diff.x}</color>";
+                else if (diff.x > 0) th = $"<color=blue>dX={diff.x}</color>";
+                else th = $"{diff.x}";
 
-            if (diff.y < 0) tv = $"<color=red>dY={diff.y}</color>";
-            else if (diff.y > 0) tv = $"<color=blue>dY={diff.y}</color>";
-            else tv = $"{diff.x}";
+                if (diff.y < 0) tv = $"<color=red>dY={diff.y}</color>";
+                else if (diff.y > 0) tv = $"<color=blue>dY={diff.y}</color>";
+                else tv = $"{diff.x}";
 
-            text2.text = $"{th}, {tv}";
-        }).AddTo(this);
+                text2.text = $"{th}, {tv}";
+            }).AddTo(this);
     }
 }

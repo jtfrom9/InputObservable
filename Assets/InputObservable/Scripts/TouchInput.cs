@@ -11,14 +11,36 @@ namespace InputObservable
     {
         int index;
         EventSystem eventSystem;
+        static Touch empty = new Touch();
+
+        bool getTouch(out Touch touch)
+        {
+            for (int i = 0; i < Input.touchCount; i++) {
+                touch = Input.GetTouch(i);
+                if(touch.fingerId==this.index) {
+                    return true;
+                }
+            }
+            touch = empty;
+            return false;
+        }
 
         protected override void Update()
         {
-            if (Input.touchCount < this.index + 1)
+            // if (Input.touchCount < this.index + 1)
+            // {
+            //     return;
+            // }
+            if (Input.touchCount ==0)
             {
                 return;
             }
-            var touch = Input.GetTouch(this.index);
+            // var touch = Input.GetTouch(this.index);
+            Touch touch;
+            if (!getTouch(out touch))
+            {
+                return;
+            }
             switch (touch.phase)
             {
                 case TouchPhase.Began:
