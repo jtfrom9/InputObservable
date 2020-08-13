@@ -31,7 +31,7 @@ public class GyroCameraController : MonoBehaviour
 
         // Screen Touch (or Mouse) to gyro input emulation
         this.DefaultInputObservable(0, EventSystem.current)
-            .AsRotate(90, 90)
+            .ToEulerAngle(new Vector2 { x = -90, y = -90 })
             .Subscribe(rot => { gyro.AddRotate(rot); })
             .AddTo(this);
     }
