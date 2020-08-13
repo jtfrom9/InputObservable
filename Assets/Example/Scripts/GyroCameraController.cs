@@ -16,7 +16,7 @@ public class GyroCameraController : MonoBehaviour
     {
         // Cursor.visible = false;
 
-        var gyro = new GyroController(this);
+        var gyro = new GyroInputObservable(this);
 
         gyro.EulerAngles.Subscribe(e =>
         {
@@ -24,14 +24,15 @@ public class GyroCameraController : MonoBehaviour
             text.text = $"Pos: {transform.position}, Rot: {transform.rotation.eulerAngles}";
         }).AddTo(this);
 
-        resetButton.OnClickAsObservable().Subscribe(_ => { gyro.Reset(); }).AddTo(this);
+        // reset gyro rotation
+        resetButton.OnClickAsObservable()
+            .Subscribe(_ => { gyro.Reset(); })
+            .AddTo(this);
 
+        // Screen Touch (or Mouse) to gyro input emulation
         this.DefaultInputObservable(0, EventSystem.current)
-        .AsRotate(90, 90)
-        .Subscribe(rot =>
-        {
-            gyro.AddRotate(rot);
-        })
-        .AddTo(this);
+            .AsRotate(90, 90)
+            .Subscribe(rot => { gyro.AddRotate(rot); })
+            .AddTo(this);
     }
 }

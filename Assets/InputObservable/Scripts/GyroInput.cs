@@ -10,7 +10,7 @@ using InputObservable;
 
 namespace InputObservable
 {
-    public class GyroController: IDisposable
+    public class GyroInputObservable: IGyroInputObservable, IDisposable
     {
         MonoBehaviour behaviour;
         bool initialized;
@@ -21,9 +21,10 @@ namespace InputObservable
         Vector3 extraRotation;
         Subject<Vector3> rotation = new Subject<Vector3>();
 
+        public GameObject gameObject { get => this.behaviour.gameObject; }
         public IObservable<Vector3> EulerAngles { get => rotation; }
 
-        private static Quaternion GyroToUnity(Quaternion q)
+        private Quaternion GyroToUnity(Quaternion q)
         {
             q.x *= -1;
             q.y *= -1;
@@ -64,15 +65,23 @@ namespace InputObservable
             this.extraRotation = Vector3.zero;
         }
 
-        public GyroController(MonoBehaviour behaviour)
+        public override string ToString()
+        {
+            return $"GyroInput()";
+        }
+
+        public GyroInputObservable(MonoBehaviour behaviour)
         {
             this.behaviour = behaviour;
 
-            this.behaviour.UpdateAsObservable()
+            behaviour.UpdateAsObservable()
                 .Where(_ => initialized)
                 .Subscribe(_ => Update()).AddTo(behaviour);
+            behaviour.OnDestroyAsObservable()
+                .Subscribe(_ => Dispose())
+                .AddTo(behaviour);
 
-            this.behaviour.StartCoroutine(Start());
+            behaviour.StartCoroutine(Start());
         }
 
         public void Dispose()

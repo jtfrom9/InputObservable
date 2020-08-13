@@ -75,7 +75,7 @@ public class TestMain : MonoBehaviour
 
     void TraceDoubleTap(IInputObservable io)
     {
-        disposables.Add(io.Double(250).Subscribe(e =>
+        disposables.Add(io.DoubleSequence(250).Subscribe(e =>
        {
            var msg = $"<color=blue>double click/tap ({e})</color>";
            log(msg);
@@ -85,7 +85,7 @@ public class TestMain : MonoBehaviour
 
     void TraceLongPress(IInputObservable io)
     {
-        disposables.Add(io.Long(500).Subscribe(e =>
+        disposables.Add(io.LongSequence(500).Subscribe(e =>
         {
             log($"<color=green>long press at {e}</color>");
             draw.Put(e, Color.green);
@@ -94,7 +94,7 @@ public class TestMain : MonoBehaviour
 
     void TraceDragAndDrop(IInputObservable io)
     {
-        disposables.Add(io.Long(500).Subscribe(begin =>
+        disposables.Add(io.LongSequence(500).Subscribe(begin =>
         {
             log($"<color=green>Drag begin at. {begin}</color>");
             draw.DragBegin(begin, Color.green, begin.ToString());

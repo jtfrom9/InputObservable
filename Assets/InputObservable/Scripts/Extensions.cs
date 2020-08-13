@@ -44,16 +44,21 @@ namespace InputObservable
             return io.Move.ThrottleFirst(TimeSpan.FromMilliseconds(interval));
         }
 
-        public static IObservable<InputEvent> Double(this IInputObservable io, double interval)
+        public static IObservable<InputEvent> Sequence(this IInputObservable io, int length, double interval)
         {
             return io.Begin.TimeInterval()
-                .Buffer(2, 1)
+                .Buffer(length, 1)
                 .Where(events => events[0].Interval.TotalMilliseconds > interval && events[1].Interval.TotalMilliseconds <= interval)
                 .Select(events => events[1].Value)
                 .Publish().RefCount();
         }
 
-        public static IObservable<InputEvent> Long(this IInputObservable io, double interval)
+        public static IObservable<InputEvent> DoubleSequence(this IInputObservable io, double interval)
+        {
+            return io.Sequence(2, interval);
+        }
+
+        public static IObservable<InputEvent> LongSequence(this IInputObservable io, double interval)
         {
             // return io.Begin.Throttle(TimeSpan.FromMilliseconds(interval));
             return io.Begin.SelectMany(e =>
@@ -82,39 +87,22 @@ namespace InputObservable
                 .RepeatUntilDestroy(io.gameObject);
         }
 
-        public static IObservable<Vector3> AsRotate(this IInputObservable io, Vector2 maxRotate)
-        {
-            return io.Any().TakeUntil(io.End.DelayFrame(1)).Buffer(2, 1)
-            .Where(events => events.Count > 1)
-            .RepeatUntilDestroy(io.gameObject)
-            .Select(events =>
-            {
-                // if (events.Count > 1)
-                // {
-                //     Debug.Log($"<color=blue>{events[0]}, {events[1]}</color>");
-                // }
-                // else
-                // {
-                //     Debug.Log($"<color=blue>{events[0]}");
-                // }
-                var diffx = events[1].position.x - events[0].position.x;
-                var diffy = events[1].position.y - events[0].position.y;
-                return new Vector3()
-                {
-                    x = -maxRotate.y / Screen.height * diffy, // axis X
-                    y = maxRotate.x / Screen.width * diffx, // axis Y
-                    z = 0
-                };
-            });
-        }
-
         public static IObservable<Vector3> AsRotate(this IInputObservable io, float horizontal_degree, float vertical_degree)
         {
-            return AsRotate(io, new Vector2()
-            {
-                x = horizontal_degree,
-                y = vertical_degree,
-            });
+            return io.Any().TakeUntil(io.End.DelayFrame(1)).Buffer(2, 1)
+                .Where(events => events.Count > 1)
+                .RepeatUntilDestroy(io.gameObject)
+                .Select(events =>
+                {
+                    var diffx = events[1].position.x - events[0].position.x;
+                    var diffy = events[1].position.y - events[0].position.y;
+                    return new Vector3()
+                    {
+                        x = -vertical_degree / Screen.height * diffy, // axis X
+                        y = horizontal_degree / Screen.width * diffx, // axis Y
+                        z = 0
+                    };
+                });
         }
     }
 
