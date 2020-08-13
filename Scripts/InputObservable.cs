@@ -39,6 +39,14 @@ namespace InputObservable
         IObservable<InputEvent> Move { get; }
     }
 
+    public interface IGyroInputObservable
+    {
+        GameObject gameObject { get; }
+        IObservable<Vector3> EulerAngles { get; }
+        void AddRotate(Vector3 rotate);
+        void Reset();
+    }
+
     public abstract class InputObservableBase : IInputObservable, IDisposable
     {
         MonoBehaviour behaviour;

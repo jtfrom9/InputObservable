@@ -86,7 +86,7 @@ namespace InputObservable
 
         public override string ToString()
         {
-            return $"Touch({this.index})";
+            return $"TouchInput(index={this.index})";
         }
 
         public TouchInputObservable(MonoBehaviour behaviour, int index, EventSystem eventSystem) : base(behaviour)

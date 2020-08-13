@@ -94,7 +94,7 @@ namespace InputObservable
 
         public override string ToString()
         {
-            return $"Mouse({this.buttonId})";
+            return $"MouseInput(buttonId={this.buttonId})";
         }
 
         public MouseInputObservable(MonoBehaviour behaviour, int buttonId, EventSystem eventSystem) : base(behaviour)
