@@ -37,6 +37,18 @@ namespace InputObservable
         IObservable<InputEvent> Begin { get; }
         IObservable<InputEvent> End { get; }
         IObservable<InputEvent> Move { get; }
+        bool Began { get; }
+    }
+
+    public struct MouseWheelEvent
+    {
+        public Vector2 position;
+        public float wheel;
+    }
+
+    public interface IMouseWheelObservable
+    {
+        IObservable<MouseWheelEvent> Wheel { get; }
     }
 
     public interface IGyroInputObservable
@@ -63,6 +75,7 @@ namespace InputObservable
         public IObservable<InputEvent> Begin { get => beginStream; }
         public IObservable<InputEvent> End { get => endStream; }
         public IObservable<InputEvent> Move { get => moveStream; }
+        public bool Began { get => begin; }
 
         protected abstract void Update();
 
