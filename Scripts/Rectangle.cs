@@ -15,9 +15,6 @@ namespace InputObservable
             return Observable.CombineLatest(io1.Any(), io2.Any())
                 .TakeUntil(end)
                 .RepeatUntilDestroy(io1.gameObject)
-                // .Do(es => {
-                //     Debug.Log($"****** count={es.Count}");
-                // })
                 .Select(es =>
                 {
                     var x = Mathf.Min(es[0].position.x, es[1].position.x);
@@ -29,4 +26,18 @@ namespace InputObservable
                 .DistinctUntilChanged();
         }
     }
- }
+
+    public static class RectangleObservableExtension
+    {
+        public static IObservable<Vector2> PinchSequence(this IObservable<Rect> ro)
+        {
+            return ro.Buffer(2, 1)
+                .Select(rects =>
+                {
+                    var diffh = rects[1].width - rects[0].width;
+                    var diffv = rects[1].height - rects[0].height;
+                    return new Vector2(diffh, diffv);
+                });
+        }
+    }
+}
