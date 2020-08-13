@@ -29,26 +29,29 @@ public class TestMain : MonoBehaviour
 
     void TraceBasic(IInputObservable io)
     {
-        disposables.Add(io.Begin.Subscribe(e =>
+        io.Begin.Subscribe(e =>
         {
             log(e.ToString());
             draw.Put(e, Color.red);
-        }));
-        disposables.Add(io.Move.Subscribe(e =>
+        }).AddTo(disposables);
+
+        io.Move.Subscribe(e =>
         {
             log(e.ToString());
             draw.Put(e, Color.black);
-        }));
-        disposables.Add(io.End.Subscribe(e =>
+        }).AddTo(disposables);
+
+        io.End.Subscribe(e =>
         {
             log(e.ToString());
             draw.Put(e, Color.yellow);
-        }));
+        }).AddTo(disposables);
     }
 
     void TraceLumpPoints(IInputObservable io)
     {
-        disposables.Add(io.Any().Buffer(io.End).Subscribe(es => {
+        io.Any().Buffer(io.End).Subscribe(es =>
+        {
             log($"<color=red>Seqeuence {es.Count} points</color>");
             log($"  {es[0]}");
             if (es.Count > 2)
@@ -56,7 +59,8 @@ public class TestMain : MonoBehaviour
                 log($"  {string.Join(",", es.Select((e, i) => (e, i)).Where((e, i) => 1 <= i && i < es.Count - 1).Select(x => x.e.position.ToString()))}");
             }
             log($"  {es[es.Count - 1]}");
-            foreach(var e in es) {
+            foreach (var e in es)
+            {
                 switch (e.type)
                 {
                     case InputEventType.Begin:
@@ -70,130 +74,63 @@ public class TestMain : MonoBehaviour
                         break;
                 }
             }
-        }));
+        }).AddTo(disposables);
     }
 
     void TraceDoubleTap(IInputObservable io)
     {
-        disposables.Add(io.DoubleSequence(250).Subscribe(e =>
-       {
-           var msg = $"<color=blue>double click/tap ({e})</color>";
-           log(msg);
-           draw.Put(e, Color.blue);
-       }));
+        io.DoubleSequence(250).Subscribe(e =>
+        {
+            var msg = $"<color=blue>double click/tap ({e})</color>";
+            log(msg);
+            draw.Put(e, Color.blue);
+        }).AddTo(disposables);
     }
 
     void TraceLongPress(IInputObservable io)
     {
-        disposables.Add(io.LongSequence(500).Subscribe(e =>
+        io.LongSequence(500).Subscribe(e =>
         {
             log($"<color=green>long press at {e}</color>");
             draw.Put(e, Color.green);
-        }));
+        }).AddTo(disposables);
     }
 
     void TraceDragAndDrop(IInputObservable io)
     {
-        disposables.Add(io.LongSequence(500).Subscribe(begin =>
+        io.LongSequence(500).Subscribe(begin =>
         {
             log($"<color=green>Drag begin at. {begin}</color>");
             draw.DragBegin(begin, Color.green, begin.ToString());
 
-            disposables.Add(io.MoveThrottle(100).TakeUntil(io.End).Subscribe(drag =>
+            io.MoveThrottle(100).TakeUntil(io.End).Subscribe(drag =>
             {
                 log($"Dragging. {drag}");
                 draw.Dragging(drag, Color.green, drag.ToString());
-            }));
-            disposables.Add(io.End.First().Subscribe(drop =>
+            }).AddTo(disposables);
+
+            io.End.First().Subscribe(drop =>
             {
                 log($"<color=green>Drop at. {drop}</color>");
                 draw.DragEnd(drop, Color.green, drop.ToString());
-            }));
-        }));
+            }).AddTo(disposables);
+        }).AddTo(disposables);
     }
 
     void TraceSwipe(IInputObservable io)
     {
-        disposables.Add(io.Any().Subscribe(e =>
+        io.Any().Subscribe(e =>
         {
             draw.Put(e, Color.blue);
-        }));
-        disposables.Add(io.TakeBeforeEndTimeInterval(4).Verocity().Subscribe(vs =>
+        }).AddTo(disposables);
+        io.TakeBeforeEndTimeInterval(4).Verocity().Subscribe(vs =>
         {
             log(string.Join(", ", vs.Select(vi => vi.ToString())));
-            foreach(var v in vs) {
+            foreach (var v in vs)
+            {
                 draw.Put(v, Color.magenta);
             }
-        }));
-        // Swipe Gesture
-        // io.Sequence().BeginEndVerocity().Subscribe(vs => {
-        //     draw.Put(vs[0]);
-        //     if (vs.Count() > 1)
-        //     {
-        //         draw.Put(vs[0] + vs[1]);
-        //     }
-        // }).AddTo(this);
-
-        // io.MoveThrottleAnyTimeIntervalSequence(50).Verocity().Subscribe(verocities =>
-        // {
-        //     foreach(var v in verocities) {
-        //         log($"verocity: {v}");
-        //     }
-        // }).AddTo(this);
-
-        // long lastSeq = 0;
-        // io.Any().Buffer(2, 1)
-        // .IgnoreSubtle(1.0f)
-        // .Where(es => es[0].type!=InputEventType.End).TimeInterval().Subscribe(ts =>
-        // {
-        //     var events = ts.Value;
-        //     if(lastSeq!=events[0].sequenceId)
-        //         log("");
-        //     log($"{ts.Interval} {events[0]}, {events[1]}");
-        //     lastSeq = events[0].sequenceId;
-        // });
-
-
-        // io.Any().TimeInterval().Buffer(4)
-
-        // io.Any().Buffer(2, 1).IgnoreSubtle(1.0f).Subscribe(events =>
-        // {
-        //     log($"{events[0].id},{events[0].type}, diff={events[1].position - events[0].position}");
-        // }).AddTo(this);
-
-        // bool draging = false;
-        // var longpress = io.Begin
-        //     .SelectMany(e => Observable.Interval(TimeSpan.FromMilliseconds(500)).Select(_ => e))
-        //     .TakeUntil(io.End)
-        //     .RepeatUntilDestroy(this.gameObject)
-        //     .Where(_ => !draging);
-        // longpress.Subscribe(e =>
-        // {
-        //     log($"<color=green>Long Press Begin at. {e}</color>");
-        //     draging = true;
-        //     draw.DragBegin(e);
-        // }).AddTo(this);
-        // Observable.Merge(io.Move, io.End).ThrottleFirst(TimeSpan.FromMilliseconds(100))
-        //     .Where(_ => draging)
-        //     .Subscribe(e =>
-        //     {
-
-        //         if (e.type == InputEventType.Move)
-        //         {
-        //             log($"Dragging. {e}");
-        //         }
-        //         else
-        //         {
-        //             log($"<color=green>Drag End at. {e}</color>");
-        //             draging = false;
-        //         }
-        //     }).AddTo(this);
-
-
-        // io.Sequence().AsSwipe().Subscribe(s =>
-        // {
-        //     log($"<color=green>Swipe: {s}</color>");
-        // }).AddTo(this);
+        }).AddTo(disposables);
     }
 
     void Start()
