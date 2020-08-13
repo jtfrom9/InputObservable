@@ -7,13 +7,8 @@ using UniRx;
 
 namespace InputObservable
 {
-    public class MouseInputObservable : InputObservableBase
+    public class MouseInputObservable : InputObservableBase, IMouseWheelObservable
     {
-        public struct MouseWheelEvent
-        {
-            public Vector2 position;
-            public float wheel;
-        }
         public IObservable<MouseWheelEvent> Wheel { get => wheelSubject; }
 
         int buttonId;

@@ -44,18 +44,13 @@ namespace InputObservable
             return io.Move.ThrottleFirst(TimeSpan.FromMilliseconds(interval));
         }
 
-        public static IObservable<InputEvent> Sequence(this IInputObservable io, int length, double interval)
+        public static IObservable<InputEvent> DoubleSequence(this IInputObservable io, double interval)
         {
             return io.Begin.TimeInterval()
-                .Buffer(length, 1)
+                .Buffer(2, 1)
                 .Where(events => events[0].Interval.TotalMilliseconds > interval && events[1].Interval.TotalMilliseconds <= interval)
                 .Select(events => events[1].Value)
                 .Publish().RefCount();
-        }
-
-        public static IObservable<InputEvent> DoubleSequence(this IInputObservable io, double interval)
-        {
-            return io.Sequence(2, interval);
         }
 
         public static IObservable<InputEvent> LongSequence(this IInputObservable io, double interval)
