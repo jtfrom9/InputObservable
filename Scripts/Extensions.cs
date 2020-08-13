@@ -87,7 +87,7 @@ namespace InputObservable
                 .RepeatUntilDestroy(io.gameObject);
         }
 
-        public static IObservable<Vector3> AsRotate(this IInputObservable io, float horizontal_degree, float vertical_degree)
+        public static IObservable<Vector3> ToEulerAngle(this IInputObservable io, float horizontal_ratio, float vertical_ratio)
         {
             return io.Any().TakeUntil(io.End.DelayFrame(1)).Buffer(2, 1)
                 .Where(events => events.Count > 1)
@@ -98,11 +98,21 @@ namespace InputObservable
                     var diffy = events[1].position.y - events[0].position.y;
                     return new Vector3()
                     {
-                        x = -vertical_degree / Screen.height * diffy, // axis X
-                        y = horizontal_degree / Screen.width * diffx, // axis Y
+                        x = -vertical_ratio * diffy, // axis X
+                        y = horizontal_ratio * diffx, // axis Y
                         z = 0
                     };
                 });
+        }
+
+        public static IObservable<Vector3> ToEulerAngle(this IInputObservable io, Vector2 max_degree, Vector2Int screen)
+        {
+            return io.ToEulerAngle(max_degree.x / screen.x, max_degree.y / screen.y);
+        }
+
+        public static IObservable<Vector3> ToEulerAngle(this IInputObservable io, Vector2 max_degree)
+        {
+            return io.ToEulerAngle(max_degree.x / Screen.width, max_degree.y / Screen.width);
         }
     }
 
