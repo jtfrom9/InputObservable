@@ -11,7 +11,7 @@ public class TestMain : MonoBehaviour
     public DrawTargetView draw;
     public UICanvasView ui;
 
-    List<IDisposable> disposables = new List<IDisposable>();
+    CompositeDisposable disposables = new CompositeDisposable();
 
     void log(string msg)
     {
@@ -20,10 +20,6 @@ public class TestMain : MonoBehaviour
 
     void clear()
     {
-        foreach (var d in disposables)
-        {
-            d.Dispose();
-        }
         disposables.Clear();
     }
 
