@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UniRx;
+using UniRx.Diagnostics;
 
 namespace InputObservable
 {
@@ -47,13 +48,11 @@ namespace InputObservable
 
         public static IObservable<InputEvent> LongSequence(this IInputObservable io, double interval)
         {
-            // return io.Begin.Throttle(TimeSpan.FromMilliseconds(interval));
             return io.Begin.SelectMany(e =>
                 Observable.Interval(TimeSpan.FromMilliseconds(interval))
+                    .First()
                     .Select(_ => e)
-                    .TakeUntil(io.End))
-                .First()
-                .RepeatUntilDestroy(io.gameObject);
+                    .TakeUntil(io.End));
         }
 
         public static IObservable<IList<TimeInterval<InputEvent>>> MoveThrottleAnyTimeIntervalSequence(this IInputObservable io, double interval)
