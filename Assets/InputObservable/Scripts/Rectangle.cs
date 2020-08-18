@@ -9,6 +9,8 @@ namespace InputObservable
 {
     public static class RectangleObservable
     {
+        // Rect Stream which completes when either one of io1 and io2
+        // Client have to Repeat() for permanent stream.
         public static IObservable<Rect> From(IInputObservable io1, IInputObservable io2)
         {
             var end = Observable.Merge(io1.End, io2.End);
