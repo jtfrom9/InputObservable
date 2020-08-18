@@ -74,6 +74,26 @@ namespace InputObservable
                 .RepeatUntilDestroy(io.gameObject);
         }
 
+        public static Vector3 ToEulerAngle(this Vector2 diff, float horizontal_ratio, float vertical_ratio)
+        {
+            return new Vector3()
+            {
+                x = -vertical_ratio * diff.y, // axis X
+                y = horizontal_ratio * diff.x, // axis Y
+                z = 0
+            };
+        }
+
+        public static Vector3 ToEulerAngle(this Vector2 diff,Vector2 max_degree, Vector2Int screen)
+        {
+            return diff.ToEulerAngle(max_degree.x / screen.x, max_degree.y / screen.y);
+        }
+
+        public static Vector3 ToEulerAngle(this Vector2 diff, Vector2 max_degree)
+        {
+            return diff.ToEulerAngle(max_degree.x / Screen.width, max_degree.y / Screen.width);
+        }
+
         public static IObservable<Vector3> ToEulerAngle(this IInputObservable io, float horizontal_ratio, float vertical_ratio)
         {
             return io.Any().TakeUntil(io.End.DelayFrame(1)).Buffer(2, 1)
@@ -83,12 +103,7 @@ namespace InputObservable
                 {
                     var diffx = events[1].position.x - events[0].position.x;
                     var diffy = events[1].position.y - events[0].position.y;
-                    return new Vector3()
-                    {
-                        x = -vertical_ratio * diffy, // axis X
-                        y = horizontal_ratio * diffx, // axis Y
-                        z = 0
-                    };
+                    return ToEulerAngle(new Vector2 { x = diffx, y = diffy }, horizontal_ratio, vertical_ratio);
                 });
         }
 

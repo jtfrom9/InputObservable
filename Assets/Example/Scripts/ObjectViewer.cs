@@ -56,11 +56,8 @@ public class ObjectViewer : MonoBehaviour
                 var mag = average.magnitude;
                 if (mag > 0.1f)
                 {
-                    // clearTween();
                     Debug.Log($"magnitude = {mag}");
-                    var rotx = -(-180.0f / Screen.height) * average.y * 720* mag;
-                    var roty = (-180.0f / Screen.width) * average.x * 720 * mag;
-                    _rigidbody.AddTorque(new Vector3(rotx, roty, 0));
+                    _rigidbody.AddTorque(average.ToEulerAngle(new Vector2 { x = -180, y = -180 }) * (720 * mag));
                     // tween = target.DORotateQuaternion(
                     //     // target.rotation.eulerAngles + new Vector3(rotx, roty, 0),
                     //     target.rotation * Quaternion.Euler(rotx,roty,0),
