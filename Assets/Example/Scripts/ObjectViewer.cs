@@ -8,11 +8,16 @@ using InputObservable;
 public class ObjectViewer : MonoBehaviour
 {
     public GameObject prefab;
-    Transform target;
+    Transform _target;
+    Rigidbody _rigidbody;
 
     void Awake()
     {
-        target = Instantiate(prefab).transform;
+        var go = Instantiate(prefab);
+        _target = go.transform;
+        _rigidbody = go.AddComponent<Rigidbody>();
+        _rigidbody.useGravity = false;
+        _rigidbody.angularDrag = 1;
     }
 
     void Start()
@@ -23,30 +28,65 @@ public class ObjectViewer : MonoBehaviour
         touch0.Any().Where(e => e.type != InputEventType.Move).Subscribe(e => { Debug.Log(e); }).AddTo(this);
         touch1.Any().Where(e => e.type != InputEventType.Move).Subscribe(e => { Debug.Log(e); }).AddTo(this);
 
+        // Stop Rotation
+        touch0.Begin.Subscribe(_ =>
+        {
+            _rigidbody.angularVelocity = _rigidbody.angularVelocity * 0.1f;
+        }).AddTo(this);
+
         // Rotate by Touch Operation
         touch0.ToEulerAngle(new Vector2 { x = -180, y = -180 })
             .Where(_ => !touch1.Began)
             .Subscribe(rot =>
             {
-                target.Rotate(rot, Space.World);
+                _target.Rotate(rot, Space.World);
+            }).AddTo(this);
+
+        // Rotate Animation by Swipe operation
+        touch0.TakeBeforeEndTimeInterval(4)
+            .Verocity()
+            .Subscribe(vs =>
+            {
+                var average = new Vector2
+                {
+                    x = vs.Average(vi => vi.vector.x),
+                    y = vs.Average(vi => vi.vector.y)
+                };
+                Debug.Log($"vector = {average}");
+                var mag = average.magnitude;
+                if (mag > 0.1f)
+                {
+                    // clearTween();
+                    Debug.Log($"magnitude = {mag}");
+                    var rotx = -(-180.0f / Screen.height) * average.y * 720* mag;
+                    var roty = (-180.0f / Screen.width) * average.x * 720 * mag;
+                    _rigidbody.AddTorque(new Vector3(rotx, roty, 0));
+                    // tween = target.DORotateQuaternion(
+                    //     // target.rotation.eulerAngles + new Vector3(rotx, roty, 0),
+                    //     target.rotation * Quaternion.Euler(rotx,roty,0),
+                    //     mag)
+                    //     // RotateMode.Fast)
+                    //         .SetEase(Ease.OutExpo)
+                    //         .OnComplete(() => Debug.Log("<color=red>Complete</color>"));
+                }
             }).AddTo(this);
 
         // Reset
-        var orig_rotate = target.rotation;
-        var orig_scale = target.localScale;
+        var orig_rotate = _target.rotation;
+        var orig_scale = _target.localScale;
         touch0.DoubleSequence(200).Subscribe(_ =>
         {
-            target.rotation = orig_rotate;
-            target.localScale = orig_scale;
+            _target.rotation = orig_rotate;
+            _target.localScale = orig_scale;
         }).AddTo(this);
 
         // Scale Object by Mouse Wheel
         var camera = Camera.main;
         (touch0 as IMouseWheelObservable)?.Wheel.Subscribe(v =>
         {
-            var scale = target.localScale + Vector3.one * v.wheel;
+            var scale = _target.localScale + Vector3.one * v.wheel;
             if(0.1 < scale.x && scale.x < 10)
-                target.localScale += Vector3.one * v.wheel;
+                _target.localScale += Vector3.one * v.wheel;
         }).AddTo(this);
 
         // Scale Object by Pinch Operation
@@ -58,21 +98,21 @@ public class ObjectViewer : MonoBehaviour
             if (diff.x > 0 && diff.y > 0)
             {
                 var v = Mathf.Max(diff.x / Screen.width, diff.y / Screen.height);
-                var scale = target.localScale + Vector3.one * v * 10;
+                var scale = _target.localScale + Vector3.one * v * 10;
                 if (scale.x < 10)
                 {
-                    target.localScale = scale;
-                    Debug.Log($"pinch-out: diff={diff}, v={v}, localScale={target.localScale}");
+                    _target.localScale = scale;
+                    Debug.Log($"pinch-out: diff={diff}, v={v}, localScale={_target.localScale}");
                 }
             }
             else if (diff.x < 0 && diff.y < 0)
             {
                 var v = Mathf.Min(diff.x / Screen.width, diff.y / Screen.height);
-                var scale = target.localScale + Vector3.one * v * 10;
+                var scale = _target.localScale + Vector3.one * v * 10;
                 if (scale.x > 0.1)
                 {
-                    target.localScale = scale;
-                    Debug.Log($"pinch-in: diff={diff}, v={v}, localScale={target.localScale}");
+                    _target.localScale = scale;
+                    Debug.Log($"pinch-in: diff={diff}, v={v}, localScale={_target.localScale}");
                 }
             }
         }).AddTo(this);
