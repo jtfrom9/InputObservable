@@ -32,13 +32,6 @@ namespace InputObservable
             return Observable.Merge(io.Begin, io.Move, io.End);
         }
 
-        public static IObservable<InputEvent> Any(this IInputObservable io, double interval)
-        {
-            return Observable.Merge(io.Begin,
-                io.Move.ThrottleFirst(TimeSpan.FromMilliseconds(interval)),
-                io.End);
-        }
-
         public static IObservable<InputEvent> MoveThrottle(this IInputObservable io, double interval)
         {
             return io.Move.ThrottleFirst(TimeSpan.FromMilliseconds(interval));
@@ -49,8 +42,7 @@ namespace InputObservable
             return io.Begin.TimeInterval()
                 .Buffer(2, 1)
                 .Where(events => events[0].Interval.TotalMilliseconds > interval && events[1].Interval.TotalMilliseconds <= interval)
-                .Select(events => events[1].Value)
-                .Publish().RefCount();
+                .Select(events => events[1].Value);
         }
 
         public static IObservable<InputEvent> LongSequence(this IInputObservable io, double interval)
