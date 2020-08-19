@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UniRx;
+using UniRx.Diagnostics;
 using InputObservable;
 
 public class TouchSpecificTest : MonoBehaviour
@@ -45,10 +46,17 @@ public class TouchSpecificTest : MonoBehaviour
             ios.Add(io);
         }
 
-        var ro = RectangleObservable.From(ios[0], ios[1]);
-        ro.DoOnCompleted(() => {
+        // Reset by finger release
+        Observable.Merge(ios[0].End, ios[1].End).Subscribe(_ =>
+        {
+            text.text = "";
             text2.text = "";
-        }).RepeatUntilDestroy(this).Subscribe(rect =>
+        }).AddTo(this);
+
+        var ro = RectangleObservable.From(ios[0], ios[1]);
+
+        // Rectangle
+        ro.RepeatUntilDestroy(this).Subscribe(rect =>
         {
             Debug.Log($"Rect: {rect}");
             text.text = rect.ToString();
