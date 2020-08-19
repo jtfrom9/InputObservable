@@ -11,18 +11,13 @@ namespace InputObservable
 {
     public static class IInputObservableMonoBehaviourExtension
     {
-        public static IInputObservable DefaultInputObservable(this MonoBehaviour behaviour, int id, EventSystem eventSystem)
+        public static InputObservableContext DefaultInputContext(this MonoBehaviour behaviour, EventSystem eventSystem = null)
         {
 #if UNITY_EDITOR || UNITY_WEBGL
-            return new MouseInputObservable(behaviour, id, eventSystem);
+            return new MouseInputContext(behaviour, eventSystem);
 #elif UNITY_ANDROID || UNITY_IOS
-            return new TouchInputObservable(behaviour, id, eventSystem);
+            return new TouchInputContext(behaviour, eventSystem);
 #endif
-        }
-
-        public static IInputObservable DefaultInputObservable(this MonoBehaviour behaviour, int id = 0)
-        {
-            return DefaultInputObservable(behaviour, id, EventSystem.current);
         }
     }
 
