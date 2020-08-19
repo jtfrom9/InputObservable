@@ -7,15 +7,65 @@ using UniRx;
 
 namespace InputObservable
 {
-    public class MouseInputObservable : InputObservableBase, IMouseWheelObservable
+    public class MouseInputContext : InputObservableContext,IMouseWheelObservable
     {
-        public IObservable<MouseWheelEvent> Wheel { get => wheelSubject; }
+        MouseInputObservable[] observables = new MouseInputObservable[3];
 
-        int buttonId;
-        EventSystem eventSystem;
+        public IObservable<MouseWheelEvent> Wheel { get => wheelSubject; }
         Subject<MouseWheelEvent> wheelSubject = new Subject<MouseWheelEvent>();
 
         protected override void Update()
+        {
+            foreach (var o in observables)
+            {
+                if (o != null)
+                {
+                    o.Update(eventSystem);
+                }
+            }
+
+            var wheel = Input.GetAxis("Mouse ScrollWheel");
+            if (wheel < 0 || 0 < wheel)
+            {
+                wheelSubject.OnNext(new MouseWheelEvent()
+                {
+                    position = Input.mousePosition,
+                    wheel = wheel
+                });
+            }
+        }
+
+        public override IInputObservable GetObservable(int id)
+        {
+            if (observables[id] == null)
+            {
+                observables[id] = new MouseInputObservable(this, id);
+            }
+            return observables[id];
+        }
+
+        public override void Dispose()
+        {
+            for (int i = 0; i < observables.Length; i++)
+            {
+                if (observables[i] != null)
+                {
+                    observables[i].Dispose();
+                    observables[i] = null;
+                }
+            }
+        }
+
+        public MouseInputContext(MonoBehaviour behaviour, EventSystem eventSystem) :
+            base(behaviour, eventSystem)
+        { }
+    }
+
+    public class MouseInputObservable : InputObservableBase
+    {
+        int buttonId;
+
+        internal void Update(EventSystem eventSystem)
         {
             if (Input.GetMouseButtonDown(buttonId))
             {
@@ -76,15 +126,6 @@ namespace InputObservable
                     moveStream.OnNext(e);
                 }
             }
-
-            var wheel = Input.GetAxis("Mouse ScrollWheel");
-            if(wheel < 0 || 0 < wheel) {
-                wheelSubject.OnNext(new MouseWheelEvent()
-                {
-                    position = Input.mousePosition,
-                    wheel = wheel
-                });
-            }
         }
 
         public override string ToString()
@@ -92,10 +133,9 @@ namespace InputObservable
             return $"MouseInput(buttonId={this.buttonId})";
         }
 
-        public MouseInputObservable(MonoBehaviour behaviour, int buttonId, EventSystem eventSystem) : base(behaviour)
+        public MouseInputObservable(InputObservableContext context, int buttonId) : base(context)
         {
             this.buttonId = buttonId;
-            this.eventSystem = eventSystem;
         }
     }
 }

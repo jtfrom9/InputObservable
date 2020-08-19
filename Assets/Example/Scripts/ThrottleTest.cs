@@ -13,7 +13,7 @@ public class ThrottleTest : MonoBehaviour
         throttleSlider.Text = "Throttle: ";
         var draw = FindObjectOfType<DrawTargetView>();
 
-        var io = this.DefaultInputObservable();
+        var io = this.DefaultInputContext().GetObservable(0);
 
         io.Begin.Subscribe(e => {
             draw.DragBegin(e, Color.black);

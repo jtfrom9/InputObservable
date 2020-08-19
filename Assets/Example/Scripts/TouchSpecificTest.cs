@@ -36,10 +36,11 @@ public class TouchSpecificTest : MonoBehaviour
     void Start()
     {
         var ios = new List<IInputObservable>();
-        var colors = new List<Color> { Color.green, Color.yellow, Color.gray, Color.gray, Color.gray };
+        var colors = new List<Color> { Color.green, Color.yellow, Color.red, Color.blue, Color.black };
+        var context = this.DefaultInputContext();
         foreach (var (index, color) in colors.Select((color, index) => (index, color)))
         {
-            var io = this.DefaultInputObservable(index);
+            var io = context.GetObservable(index);
             io.Any().Subscribe(touchDrawHandler(color)).AddTo(this);
             ios.Add(io);
         }

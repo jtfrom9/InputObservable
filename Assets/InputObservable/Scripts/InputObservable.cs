@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
-using UniRx.Triggers;
 
 namespace InputObservable
 {
@@ -24,13 +23,6 @@ namespace InputObservable
         public override string ToString() { return $"[{sender}]({sequenceId}.{id},{type},{position})"; }
     }
 
-    public struct VerocityInfo
-    {
-        public InputEvent @event;
-        public Vector2 vector;
-        public override string ToString() { return $"<{@event},{vector}>"; }
-    }
-
     public interface IInputObservable
     {
         GameObject gameObject { get; }
@@ -38,6 +30,13 @@ namespace InputObservable
         IObservable<InputEvent> End { get; }
         IObservable<InputEvent> Move { get; }
         bool Began { get; }
+    }
+
+    public struct VerocityInfo
+    {
+        public InputEvent @event;
+        public Vector2 vector;
+        public override string ToString() { return $"<{@event},{vector}>"; }
     }
 
     public struct MouseWheelEvent
@@ -57,44 +56,5 @@ namespace InputObservable
         IObservable<Vector3> EulerAngles { get; }
         void AddRotate(Vector3 rotate);
         void Reset();
-    }
-
-    public abstract class InputObservableBase : IInputObservable, IDisposable
-    {
-        MonoBehaviour behaviour;
-        protected long sequenceId = 0;
-        protected long id = 0;
-        protected bool begin = false;
-        protected Vector2 beginPos = Vector2.zero;
-
-        protected Subject<InputEvent> beginStream = new Subject<InputEvent>();
-        protected Subject<InputEvent> endStream = new Subject<InputEvent>();
-        protected Subject<InputEvent> moveStream = new Subject<InputEvent>();
-
-        public GameObject gameObject { get => behaviour.gameObject; }
-        public IObservable<InputEvent> Begin { get => beginStream; }
-        public IObservable<InputEvent> End { get => endStream; }
-        public IObservable<InputEvent> Move { get => moveStream; }
-        public bool Began { get => begin; }
-
-        protected abstract void Update();
-
-        public InputObservableBase(MonoBehaviour behaviour)
-        {
-            this.behaviour = behaviour;
-            behaviour.UpdateAsObservable()
-                .Subscribe(_ => Update())
-                .AddTo(behaviour);
-            behaviour.OnDestroyAsObservable()
-                .Subscribe(_ => Dispose())
-                .AddTo(behaviour);
-        }
-
-        public void Dispose()
-        {
-            beginStream.Dispose();
-            endStream.Dispose();
-            moveStream.Dispose();
-        }
     }
 }

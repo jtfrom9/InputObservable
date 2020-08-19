@@ -22,8 +22,9 @@ public class ObjectViewer : MonoBehaviour
 
     void Start()
     {
-        var touch0 = this.DefaultInputObservable(0, null);
-        var touch1 = this.DefaultInputObservable(1, null);
+        var context = this.DefaultInputContext();
+        var touch0 = context.GetObservable(0);
+        var touch1 = context.GetObservable(1);
 
         touch0.Any().Where(e => e.type != InputEventType.Move).Subscribe(e => { Debug.Log(e); }).AddTo(this);
         touch1.Any().Where(e => e.type != InputEventType.Move).Subscribe(e => { Debug.Log(e); }).AddTo(this);
@@ -79,7 +80,7 @@ public class ObjectViewer : MonoBehaviour
 
         // Scale Object by Mouse Wheel
         var camera = Camera.main;
-        (touch0 as IMouseWheelObservable)?.Wheel.Subscribe(v =>
+        (context as IMouseWheelObservable)?.Wheel.Subscribe(v =>
         {
             var scale = _target.localScale + Vector3.one * v.wheel;
             if(0.1 < scale.x && scale.x < 10)

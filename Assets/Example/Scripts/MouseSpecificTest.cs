@@ -25,14 +25,15 @@ public class MouseSpecificTest : MonoBehaviour
 
     void Start()
     {
-        var left = new MouseInputObservable(this, 0, null);
-        left.Wheel.Subscribe(e =>
+        var context = new MouseInputContext(this, null);
+        context.Wheel.Subscribe(e =>
         {
             target.transform.Translate(Vector3.forward * e.wheel);
         }).AddTo(this);
 
+        var left = context.GetObservable(0);
         left.Any().Subscribe(mouseDrawHandler(Color.blue));
-        new MouseInputObservable(this, 1, null).Any().Subscribe(mouseDrawHandler(Color.yellow));
-        new MouseInputObservable(this, 2, null).Any().Subscribe(mouseDrawHandler(Color.magenta));
+        context.GetObservable(1).Any().Subscribe(mouseDrawHandler(Color.yellow));
+        context.GetObservable(2).Any().Subscribe(mouseDrawHandler(Color.magenta));
     }
 }

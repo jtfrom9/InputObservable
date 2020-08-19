@@ -131,7 +131,7 @@ public class TestMain : MonoBehaviour
 
     void Start()
     {
-        var io = this.DefaultInputObservable();
+        var io = this.DefaultInputContext().GetObservable(0);
 
         ui.SelectedToggle.Subscribe(type =>
         {

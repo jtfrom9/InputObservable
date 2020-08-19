@@ -7,40 +7,52 @@ using UniRx;
 
 namespace InputObservable
 {
-    public class TouchInputObservable : InputObservableBase
+    public class TouchInputContext : InputObservableContext
     {
-        int index;
-        EventSystem eventSystem;
-        static Touch empty = new Touch();
-
-        bool getTouch(out Touch touch)
-        {
-            for (int i = 0; i < Input.touchCount; i++) {
-                touch = Input.GetTouch(i);
-                if(touch.fingerId==this.index) {
-                    return true;
-                }
-            }
-            touch = empty;
-            return false;
-        }
+        Dictionary<int, TouchInputObservable> observables = new Dictionary<int, TouchInputObservable>();
 
         protected override void Update()
         {
-            // if (Input.touchCount < this.index + 1)
-            // {
-            //     return;
-            // }
-            if (Input.touchCount ==0)
+            for (int i = 0; i < Input.touchCount; i++)
             {
-                return;
+                var touch = Input.GetTouch(i);
+                TouchInputObservable o;
+                if (observables.TryGetValue(touch.fingerId, out o))
+                {
+                    o.Update(touch, eventSystem);
+                }
             }
-            // var touch = Input.GetTouch(this.index);
-            Touch touch;
-            if (!getTouch(out touch))
+        }
+
+        public override IInputObservable GetObservable(int id)
+        {
+            if (!observables.ContainsKey(id))
             {
-                return;
+                observables[id] = new TouchInputObservable(this, id);
             }
+            return observables[id];
+        }
+
+        public override void Dispose()
+        {
+            foreach (var o in observables.Values)
+            {
+                o.Dispose();
+            }
+            observables.Clear();
+        }
+
+        public TouchInputContext(MonoBehaviour behaviour, EventSystem eventSystem) :
+            base(behaviour, eventSystem)
+        { }
+    }
+
+    public class TouchInputObservable : InputObservableBase
+    {
+        int index;
+
+        internal void Update(Touch touch, EventSystem eventSystem)
+        {
             switch (touch.phase)
             {
                 case TouchPhase.Began:
@@ -111,10 +123,9 @@ namespace InputObservable
             return $"TouchInput(index={this.index})";
         }
 
-        public TouchInputObservable(MonoBehaviour behaviour, int index, EventSystem eventSystem) : base(behaviour)
+        public TouchInputObservable(InputObservableContext context, int index) : base(context)
         {
             this.index = index;
-            this.eventSystem = eventSystem;
         }
     }
 }

@@ -9,7 +9,7 @@ public class DoubleSequenceTest : MonoBehaviour
 {
     SliderController slider;
     DrawTargetView draw;
-    IInputObservable inputObservable = null;
+    InputObservableContext context = null;
     IDisposable disposable = null;
 
     void clear()
@@ -23,7 +23,7 @@ public class DoubleSequenceTest : MonoBehaviour
     void setup()
     {
         clear();
-        disposable = inputObservable.DoubleSequence(slider.Value.Value).Subscribe(e => {
+        disposable = context.GetObservable(0).DoubleSequence(slider.Value.Value).Subscribe(e => {
             draw.Put(e, Color.red);
         });
     }
@@ -34,8 +34,8 @@ public class DoubleSequenceTest : MonoBehaviour
         slider.Text = "Interval: ";
         draw = FindObjectOfType<DrawTargetView>();
 
-        inputObservable = this.DefaultInputObservable();
-        inputObservable.Begin.TimeInterval().Subscribe(ts => {
+        context = this.DefaultInputContext();
+        context.GetObservable(0).Begin.TimeInterval().Subscribe(ts => {
             Debug.Log($"[{ts.Value.sequenceId}] {ts.Interval.Milliseconds}");
         }).AddTo(this);
 
