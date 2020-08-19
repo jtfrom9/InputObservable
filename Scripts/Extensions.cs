@@ -50,22 +50,13 @@ namespace InputObservable
                     .TakeUntil(io.End));
         }
 
-        public static IObservable<IList<TimeInterval<InputEvent>>> MoveThrottleAnyTimeIntervalSequence(this IInputObservable io, double interval)
-        {
-            return Observable.Merge(io.Begin,
-                io.Move.ThrottleFirst(TimeSpan.FromMilliseconds(interval)),
-                io.End)
-                .TimeInterval()
-                .Buffer(io.End);
-        }
-
         public static IObservable<IList<TimeInterval<InputEvent>>> TakeBeforeEndTimeInterval(this IInputObservable io, int count)
         {
             return io.Any().TakeUntil(io.End.DelayFrame(1))
                 .TimeInterval()
                 .TakeLast(count)
                 .Buffer(count)
-                .RepeatUntilDestroy(io.gameObject);
+                .RepeatUntilDestroy(io.Context.gameObject);
         }
 
         public static Vector3 ToEulerAngle(this Vector2 diff, float horizontal_ratio, float vertical_ratio)
@@ -92,7 +83,7 @@ namespace InputObservable
         {
             return io.Any().TakeUntil(io.End.DelayFrame(1)).Buffer(2, 1)
                 .Where(events => events.Count > 1)
-                .RepeatUntilDestroy(io.gameObject)
+                .RepeatUntilDestroy(io.Context.gameObject)
                 .Select(events =>
                 {
                     var diffx = events[1].position.x - events[0].position.x;
