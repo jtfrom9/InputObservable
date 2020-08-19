@@ -62,11 +62,16 @@ namespace InputObservable
 
         public static IObservable<IList<TimeInterval<InputEvent>>> TakeBeforeEndTimeInterval(this IInputObservable io, int count)
         {
-            return io.Any().TakeUntil(io.End.DelayFrame(1))
-                .TimeInterval()
-                .TakeLast(count)
-                .Buffer(count)
-                .RepeatUntilDestroy(io.Context.gameObject);
+            // return io.Any().TakeUntil(io.End.DelayFrame(1))
+            //     .TimeInterval()
+            //     .TakeLast(count)
+            //     .Buffer(count)
+            //     .RepeatUntilDestroy(io.Context.gameObject);
+            return io.Begin.SelectMany(e =>
+                Observable.Merge(Observable.Return(e), io.Any().TakeUntil(io.End.DelayFrame(1)))
+                    .TimeInterval()
+                    .TakeLast(count)
+                    .Buffer(count));
         }
 
         public static Vector3 ToEulerAngle(this Vector2 diff, float horizontal_ratio, float vertical_ratio)
@@ -91,9 +96,19 @@ namespace InputObservable
 
         public static IObservable<Vector3> ToEulerAngle(this IInputObservable io, float horizontal_ratio, float vertical_ratio)
         {
-            return io.Any().TakeUntil(io.End.DelayFrame(1)).Buffer(2, 1)
+            // return io.Any().TakeUntil(io.End.DelayFrame(1)).Buffer(2, 1)
+            //     .Where(events => events.Count > 1)
+            //     .RepeatUntilDestroy(io.Context.gameObject)
+            //     .Select(events =>
+            //     {
+            //         var diffx = events[1].position.x - events[0].position.x;
+            //         var diffy = events[1].position.y - events[0].position.y;
+            //         return ToEulerAngle(new Vector2 { x = diffx, y = diffy }, horizontal_ratio, vertical_ratio);
+            //     });
+            return io.Begin.SelectMany(e =>
+                Observable.Merge(Observable.Return(e), io.Any().TakeUntil(io.End.DelayFrame(1)))
+                    .Buffer(2, 1))
                 .Where(events => events.Count > 1)
-                .RepeatUntilDestroy(io.Context.gameObject)
                 .Select(events =>
                 {
                     var diffx = events[1].position.x - events[0].position.x;

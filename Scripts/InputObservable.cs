@@ -25,7 +25,6 @@ namespace InputObservable
 
     public interface IInputObservable
     {
-        InputObservableContext Context { get; }
         IObservable<InputEvent> Begin { get; }
         IObservable<InputEvent> End { get; }
         IObservable<InputEvent> Move { get; }
