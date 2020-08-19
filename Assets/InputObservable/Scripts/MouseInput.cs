@@ -7,7 +7,7 @@ using UniRx;
 
 namespace InputObservable
 {
-    public class MouseInputContext : InputObservableContext,IMouseWheelObservable
+    public class MouseInputContext : InputObservableContext, IMouseWheelObservable
     {
         MouseInputObservable[] observables = new MouseInputObservable[3];
 
