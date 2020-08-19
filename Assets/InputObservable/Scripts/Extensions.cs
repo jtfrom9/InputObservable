@@ -11,13 +11,23 @@ namespace InputObservable
 {
     public static class IInputObservableMonoBehaviourExtension
     {
+        static InputObservableContext defaultContext = null;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void _initDefaultContext() { defaultContext = null; }
+
         public static InputObservableContext DefaultInputContext(this MonoBehaviour behaviour, EventSystem eventSystem = null)
         {
+            if (defaultContext != null)
+            {
+                throw new InvalidOperationException("already created defaultContext");
+            }
 #if UNITY_EDITOR || UNITY_WEBGL
-            return new MouseInputContext(behaviour, eventSystem);
+            defaultContext = new MouseInputContext(behaviour, eventSystem);
 #elif UNITY_ANDROID || UNITY_IOS
-            return new TouchInputContext(behaviour, eventSystem);
+            defaultContext = new TouchInputContext(behaviour, eventSystem);
 #endif
+            return defaultContext;
         }
     }
 
