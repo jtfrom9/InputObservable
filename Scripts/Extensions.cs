@@ -74,6 +74,36 @@ namespace InputObservable
                     .Buffer(count));
         }
 
+        public static IObservable<IList<VerocityInfo>> Verocity(this IObservable<IList<TimeInterval<InputEvent>>> timeSeqIo)
+        {
+            return timeSeqIo.Select(sequence =>
+            {
+                var verocities = new List<VerocityInfo>();
+                var prev = sequence.First();
+                for (int i = 1; i < sequence.Count; i++)
+                {
+                    var t = sequence[i];
+                    var diff = t.Interval.TotalMilliseconds;
+                    verocities.Add(new VerocityInfo()
+                    {
+                        @event = prev.Value,
+                        vector = new Vector2()
+                        {
+                            x = (float)((t.Value.position.x - prev.Value.position.x) / diff),
+                            y = (float)((t.Value.position.y - prev.Value.position.y) / diff),
+                        }
+                    });
+                    prev = t;
+                }
+                return verocities;
+            });
+        }
+
+        public static IObservable<IList<VerocityInfo>> Verocity(this IInputObservable io, int count)
+        {
+            return io.TakeBeforeEndTimeInterval(count).Verocity();
+        }
+
         public static Vector3 ToEulerAngle(this Vector2 diff, float horizontal_ratio, float vertical_ratio)
         {
             return new Vector3()
@@ -143,30 +173,5 @@ namespace InputObservable
 
     public static class IInputTimeListObservableExtension
     {
-        public static IObservable<IList<VerocityInfo>> Verocity(this IObservable<IList<TimeInterval<InputEvent>>> timeSeqIo)
-        {
-            return timeSeqIo.Select(sequence =>
-            {
-                var verocities = new List<VerocityInfo>();
-                var prev = sequence.First();
-                for (int i = 1; i < sequence.Count; i++)
-                {
-                    var t = sequence[i];
-                    var diff = t.Interval.TotalMilliseconds;
-                    verocities.Add(new VerocityInfo()
-                    {
-                        @event = prev.Value,
-                        vector = new Vector2()
-                        {
-                            x = (float)((t.Value.position.x - prev.Value.position.x) / diff),
-                            y = (float)((t.Value.position.y - prev.Value.position.y) / diff),
-                        }
-                    });
-                    prev = t;
-                }
-                return verocities;
-            });
-        }
-
     }
 }
