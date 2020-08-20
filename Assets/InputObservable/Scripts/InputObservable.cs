@@ -51,7 +51,6 @@ namespace InputObservable
 
     public interface IGyroInputObservable
     {
-        GameObject gameObject { get; }
         IObservable<Vector3> EulerAngles { get; }
         void AddRotate(Vector3 rotate);
         void Reset();

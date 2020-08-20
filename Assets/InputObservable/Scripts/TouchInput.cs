@@ -47,7 +47,7 @@ namespace InputObservable
         { }
     }
 
-    public class TouchInputObservable : InputObservableBase
+    class TouchInputObservable : InputObservableBase
     {
         int index;
 

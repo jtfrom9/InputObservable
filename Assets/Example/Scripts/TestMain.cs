@@ -113,13 +113,13 @@ public class TestMain : MonoBehaviour
         }).AddTo(disposables);
     }
 
-    void TraceSwipe(IInputObservable io)
+    void TraceLastVerocity(IInputObservable io, int count)
     {
         io.Any().Subscribe(e =>
         {
             draw.Put(e, Color.blue);
         }).AddTo(disposables);
-        io.TakeBeforeEndTimeInterval(4).Verocity().Subscribe(vs =>
+        io.Verocity(count).Subscribe(vs =>
         {
             log(string.Join(", ", vs.Select(vi => vi.ToString())));
             foreach (var v in vs)
@@ -140,7 +140,7 @@ public class TestMain : MonoBehaviour
 
             if (type == "Basic")
                 TraceBasic(io);
-            else if (type == "LumpPoints")
+            else if (type == "Lump")
                 TraceLumpPoints(io);
             else if (type == "Double")
                 TraceDoubleTap(io);
@@ -148,8 +148,10 @@ public class TestMain : MonoBehaviour
                 TraceLongPress(io);
             else if (type == "DragAndDrop")
                 TraceDragAndDrop(io);
-            else if (type == "Swipe")
-                TraceSwipe(io);
+            else if (type == "Verocity4")
+                TraceLastVerocity(io, 4);
+            else if (type == "Verocity16")
+                TraceLastVerocity(io, 16);
             else
                 Debug.LogError($"not found: {type}");
         }).AddTo(this);

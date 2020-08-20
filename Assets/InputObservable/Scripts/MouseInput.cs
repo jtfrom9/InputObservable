@@ -61,7 +61,7 @@ namespace InputObservable
         { }
     }
 
-    public class MouseInputObservable : InputObservableBase
+    class MouseInputObservable : InputObservableBase
     {
         int buttonId;
 

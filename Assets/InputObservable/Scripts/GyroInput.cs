@@ -21,7 +21,6 @@ namespace InputObservable
         Vector3 extraRotation;
         Subject<Vector3> rotation = new Subject<Vector3>();
 
-        public GameObject gameObject { get => this.behaviour.gameObject; }
         public IObservable<Vector3> EulerAngles { get => rotation; }
 
         private Quaternion GyroToUnity(Quaternion q)

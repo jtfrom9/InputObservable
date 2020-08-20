@@ -44,8 +44,7 @@ public class ObjectViewer : MonoBehaviour
             }).AddTo(this);
 
         // Rotate Animation by Swipe operation
-        touch0.TakeBeforeEndTimeInterval(4)
-            .Verocity()
+        touch0.Verocity(4)
             .Subscribe(vs =>
             {
                 var average = new Vector2
