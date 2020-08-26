@@ -18,10 +18,10 @@ namespace InputObservable
         protected Subject<InputEvent> endStream = new Subject<InputEvent>();
         protected Subject<InputEvent> moveStream = new Subject<InputEvent>();
 
-        public IObservable<InputEvent> Begin { get => beginStream; }
-        public IObservable<InputEvent> End { get => endStream; }
-        public IObservable<InputEvent> Move { get => moveStream; }
-        public bool Began { get => begin; }
+        public IObservable<InputEvent> OnBegin { get => beginStream; }
+        public IObservable<InputEvent> OnEnd { get => endStream; }
+        public IObservable<InputEvent> OnMove { get => moveStream; }
+        public bool IsBegin { get => begin; }
 
         public void Dispose()
         {

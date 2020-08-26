@@ -12,7 +12,7 @@ namespace InputObservable
         // Client have to Repeat() for permanent stream.
         public static IObservable<Rect> From(IInputObservable io1, IInputObservable io2)
         {
-            var end = Observable.Merge(io1.End, io2.End);
+            var end = Observable.Merge(io1.OnEnd, io2.OnEnd);
             return Observable.CombineLatest(io1.Any(), io2.Any())
                 .TakeUntil(end)
                 .Select(es =>

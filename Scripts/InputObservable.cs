@@ -25,10 +25,10 @@ namespace InputObservable
 
     public interface IInputObservable
     {
-        IObservable<InputEvent> Begin { get; }
-        IObservable<InputEvent> End { get; }
-        IObservable<InputEvent> Move { get; }
-        bool Began { get; }
+        IObservable<InputEvent> OnBegin { get; }
+        IObservable<InputEvent> OnEnd { get; }
+        IObservable<InputEvent> OnMove { get; }
+        bool IsBegin { get; }
     }
 
     public struct VerocityInfo
