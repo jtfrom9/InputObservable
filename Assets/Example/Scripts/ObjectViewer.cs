@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,7 +18,8 @@ public class ObjectViewer : MonoBehaviour
         _target = go.transform;
         _rigidbody = go.AddComponent<Rigidbody>();
         _rigidbody.useGravity = false;
-        _rigidbody.angularDrag = 1;
+        _rigidbody.angularDrag = 1f;
+        _rigidbody.maxAngularVelocity = 20;
     }
 
     void Start()
@@ -29,17 +31,22 @@ public class ObjectViewer : MonoBehaviour
         touch0.Any().Where(e => e.type != InputEventType.Move).Subscribe(e => { Debug.Log(e); }).AddTo(this);
         touch1.Any().Where(e => e.type != InputEventType.Move).Subscribe(e => { Debug.Log(e); }).AddTo(this);
 
-        // Stop Rotation
-        touch0.Begin.Subscribe(_ =>
-        {
-            _rigidbody.angularVelocity = _rigidbody.angularVelocity * 0.1f;
-        }).AddTo(this);
+        // Stop Rotation by keep touch
+        touch0.Keep(100, () => _rigidbody.angularVelocity.x > 0 || _rigidbody.angularVelocity.y > 0 || _rigidbody.angularVelocity.z > 0)
+            .Subscribe(_ => {
+                Debug.Log("break");
+                var m = _rigidbody.angularVelocity.magnitude;
+                _rigidbody.angularVelocity = (m < 0.1f) ? Vector3.zero : _rigidbody.angularVelocity * 0.1f;
+            }).AddTo(this);
 
         // Rotate by Touch Operation
-        touch0.ToEulerAngle(new Vector2 { x = -180, y = -180 })
+        var hratio = -180.0f / Screen.width;
+        var vratio = -180.0f / Screen.height;
+        touch0.Difference()
             .Where(_ => !touch1.Began)
-            .Subscribe(rot =>
+            .Subscribe(v2 =>
             {
+                var rot = v2.ToEulerAngle(hratio, vratio);
                 _target.Rotate(rot, Space.World);
             }).AddTo(this);
 
@@ -56,15 +63,9 @@ public class ObjectViewer : MonoBehaviour
                 var mag = average.magnitude;
                 if (mag > 0.1f)
                 {
-                    Debug.Log($"magnitude = {mag}");
-                    _rigidbody.AddTorque(average.ToEulerAngle(new Vector2 { x = -180, y = -180 }) * (720 * mag));
-                    // tween = target.DORotateQuaternion(
-                    //     // target.rotation.eulerAngles + new Vector3(rotx, roty, 0),
-                    //     target.rotation * Quaternion.Euler(rotx,roty,0),
-                    //     mag)
-                    //     // RotateMode.Fast)
-                    //         .SetEase(Ease.OutExpo)
-                    //         .OnComplete(() => Debug.Log("<color=red>Complete</color>"));
+                    var torque = average.ToEulerAngle(hratio, vratio) * mag;
+                    _rigidbody.AddTorque(torque, ForceMode.VelocityChange);
+                    Debug.Log($"magnitude = {mag}, torque={torque}");
                 }
             }).AddTo(this);
 
