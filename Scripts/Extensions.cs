@@ -38,6 +38,15 @@ namespace InputObservable
             return Observable.Merge(io.Begin, io.Move, io.End);
         }
 
+        public static IObservable<Unit> Keep(this IInputObservable io, double interval, Func<bool> pred)
+        {
+            return io.Begin.SelectMany(_ =>
+                Observable.Interval(TimeSpan.FromMilliseconds(100))
+                    .TakeUntil(io.End)
+                    .Where(x => pred())
+                    .Select(x => Unit.Default));
+        }
+
         public static IObservable<InputEvent> MoveThrottle(this IInputObservable io, double interval)
         {
             return io.Move.ThrottleFirst(TimeSpan.FromMilliseconds(interval));
@@ -104,6 +113,22 @@ namespace InputObservable
             return io.TakeBeforeEndTimeInterval(count).Verocity();
         }
 
+        public static IObservable<Vector2> Difference(this IInputObservable io)
+        {
+            return io.Begin.SelectMany(e =>
+                Observable.Merge(Observable.Return(e), io.Any().TakeUntil(io.End.DelayFrame(1)))
+                    .Buffer(2, 1))
+                .Where(events => events.Count > 1)
+                .Select(events =>
+                {
+                    return new Vector2
+                    {
+                        x = events[1].position.x - events[0].position.x,
+                        y = events[1].position.y - events[0].position.y
+                    };
+                });
+        }
+
         public static Vector3 ToEulerAngle(this Vector2 diff, float horizontal_ratio, float vertical_ratio)
         {
             return new Vector3()
@@ -112,49 +137,6 @@ namespace InputObservable
                 y = horizontal_ratio * diff.x, // axis Y
                 z = 0
             };
-        }
-
-        public static Vector3 ToEulerAngle(this Vector2 diff,Vector2 max_degree, Vector2Int screen)
-        {
-            return diff.ToEulerAngle(max_degree.x / screen.x, max_degree.y / screen.y);
-        }
-
-        public static Vector3 ToEulerAngle(this Vector2 diff, Vector2 max_degree)
-        {
-            return diff.ToEulerAngle(max_degree.x / Screen.width, max_degree.y / Screen.width);
-        }
-
-        public static IObservable<Vector3> ToEulerAngle(this IInputObservable io, float horizontal_ratio, float vertical_ratio)
-        {
-            // return io.Any().TakeUntil(io.End.DelayFrame(1)).Buffer(2, 1)
-            //     .Where(events => events.Count > 1)
-            //     .RepeatUntilDestroy(io.Context.gameObject)
-            //     .Select(events =>
-            //     {
-            //         var diffx = events[1].position.x - events[0].position.x;
-            //         var diffy = events[1].position.y - events[0].position.y;
-            //         return ToEulerAngle(new Vector2 { x = diffx, y = diffy }, horizontal_ratio, vertical_ratio);
-            //     });
-            return io.Begin.SelectMany(e =>
-                Observable.Merge(Observable.Return(e), io.Any().TakeUntil(io.End.DelayFrame(1)))
-                    .Buffer(2, 1))
-                .Where(events => events.Count > 1)
-                .Select(events =>
-                {
-                    var diffx = events[1].position.x - events[0].position.x;
-                    var diffy = events[1].position.y - events[0].position.y;
-                    return ToEulerAngle(new Vector2 { x = diffx, y = diffy }, horizontal_ratio, vertical_ratio);
-                });
-        }
-
-        public static IObservable<Vector3> ToEulerAngle(this IInputObservable io, Vector2 max_degree, Vector2Int screen)
-        {
-            return io.ToEulerAngle(max_degree.x / screen.x, max_degree.y / screen.y);
-        }
-
-        public static IObservable<Vector3> ToEulerAngle(this IInputObservable io, Vector2 max_degree)
-        {
-            return io.ToEulerAngle(max_degree.x / Screen.width, max_degree.y / Screen.width);
         }
     }
 
