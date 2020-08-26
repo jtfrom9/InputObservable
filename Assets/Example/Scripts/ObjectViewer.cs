@@ -43,7 +43,7 @@ public class ObjectViewer : MonoBehaviour
         var hratio = -180.0f / Screen.width;
         var vratio = -180.0f / Screen.height;
         touch0.Difference()
-            .Where(_ => !touch1.Began)
+            .Where(_ => !touch1.IsBegin)
             .Subscribe(v2 =>
             {
                 var rot = v2.ToEulerAngle(hratio, vratio);

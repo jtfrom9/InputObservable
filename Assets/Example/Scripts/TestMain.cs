@@ -25,19 +25,19 @@ public class TestMain : MonoBehaviour
 
     void TraceBasic(IInputObservable io)
     {
-        io.Begin.Subscribe(e =>
+        io.OnBegin.Subscribe(e =>
         {
             log(e.ToString());
             draw.Put(e, Color.red);
         }).AddTo(disposables);
 
-        io.Move.Subscribe(e =>
+        io.OnMove.Subscribe(e =>
         {
             log(e.ToString());
             draw.Put(e, Color.black);
         }).AddTo(disposables);
 
-        io.End.Subscribe(e =>
+        io.OnEnd.Subscribe(e =>
         {
             log(e.ToString());
             draw.Put(e, Color.yellow);
@@ -46,7 +46,7 @@ public class TestMain : MonoBehaviour
 
     void TraceLumpPoints(IInputObservable io)
     {
-        io.Any().Buffer(io.End).Subscribe(es =>
+        io.Any().Buffer(io.OnEnd).Subscribe(es =>
         {
             log($"<color=red>Seqeuence {es.Count} points</color>");
             log($"  {es[0]}");
@@ -99,13 +99,13 @@ public class TestMain : MonoBehaviour
             log($"<color=green>Drag begin at. {begin}</color>");
             draw.DragBegin(begin, Color.green, begin.ToString());
 
-            io.MoveThrottle(100).TakeUntil(io.End).Subscribe(drag =>
+            io.MoveThrottle(100).TakeUntil(io.OnEnd).Subscribe(drag =>
             {
                 log($"Dragging. {drag}");
                 draw.Dragging(drag, Color.green, drag.ToString());
             }).AddTo(disposables);
 
-            io.End.First().Subscribe(drop =>
+            io.OnEnd.First().Subscribe(drop =>
             {
                 log($"<color=green>Drop at. {drop}</color>");
                 draw.DragEnd(drop, Color.green, drop.ToString());

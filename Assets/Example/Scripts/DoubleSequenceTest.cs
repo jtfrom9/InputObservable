@@ -35,7 +35,7 @@ public class DoubleSequenceTest : MonoBehaviour
         draw = FindObjectOfType<DrawTargetView>();
 
         context = this.DefaultInputContext();
-        context.GetObservable(0).Begin.TimeInterval().Subscribe(ts => {
+        context.GetObservable(0).OnBegin.TimeInterval().Subscribe(ts => {
             Debug.Log($"[{ts.Value.sequenceId}] {ts.Interval.Milliseconds}");
         }).AddTo(this);
 

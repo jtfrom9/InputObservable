@@ -47,7 +47,7 @@ public class TouchSpecificTest : MonoBehaviour
         }
 
         // Reset by finger release
-        Observable.Merge(ios[0].End, ios[1].End).Subscribe(_ =>
+        Observable.Merge(ios[0].OnEnd, ios[1].OnEnd).Subscribe(_ =>
         {
             text.text = "";
             text2.text = "";

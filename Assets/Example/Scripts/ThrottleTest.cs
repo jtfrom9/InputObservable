@@ -15,22 +15,22 @@ public class ThrottleTest : MonoBehaviour
 
         var io = this.DefaultInputContext().GetObservable(0);
 
-        io.Begin.Subscribe(e => {
+        io.OnBegin.Subscribe(e => {
             draw.DragBegin(e, Color.black);
 
             IObservable<InputEvent> move;
             if(throttleSlider.Enabled.Value) {
                 move = io.MoveThrottle(throttleSlider.Value.Value);
             } else {
-                move = io.Move;
+                move = io.OnMove;
             }
-            move.TakeUntil(io.End).FrameInterval().Subscribe(ts =>
+            move.TakeUntil(io.OnEnd).FrameInterval().Subscribe(ts =>
             {
                 // Time.frameCount
                 draw.Dragging(ts.Value, Color.red, ts.Interval.ToString());
             }).AddTo(this);
 
-            io.End.First().Subscribe(ee =>
+            io.OnEnd.First().Subscribe(ee =>
             {
                 draw.DragEnd(ee, Color.gray);
             }).AddTo(this);

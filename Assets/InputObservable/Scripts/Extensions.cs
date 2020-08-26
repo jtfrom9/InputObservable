@@ -35,26 +35,26 @@ namespace InputObservable
     {
         public static IObservable<InputEvent> Any(this IInputObservable io)
         {
-            return Observable.Merge(io.Begin, io.Move, io.End);
+            return Observable.Merge(io.OnBegin, io.OnMove, io.OnEnd);
         }
 
         public static IObservable<Unit> Keep(this IInputObservable io, double interval, Func<bool> pred)
         {
-            return io.Begin.SelectMany(_ =>
+            return io.OnBegin.SelectMany(_ =>
                 Observable.Interval(TimeSpan.FromMilliseconds(100))
-                    .TakeUntil(io.End)
+                    .TakeUntil(io.OnEnd)
                     .Where(x => pred())
                     .Select(x => Unit.Default));
         }
 
         public static IObservable<InputEvent> MoveThrottle(this IInputObservable io, double interval)
         {
-            return io.Move.ThrottleFirst(TimeSpan.FromMilliseconds(interval));
+            return io.OnMove.ThrottleFirst(TimeSpan.FromMilliseconds(interval));
         }
 
         public static IObservable<InputEvent> DoubleSequence(this IInputObservable io, double interval)
         {
-            return io.Begin.TimeInterval()
+            return io.OnBegin.TimeInterval()
                 .Buffer(2, 1)
                 .Where(events => events[0].Interval.TotalMilliseconds > interval && events[1].Interval.TotalMilliseconds <= interval)
                 .Select(events => events[1].Value);
@@ -62,11 +62,11 @@ namespace InputObservable
 
         public static IObservable<InputEvent> LongSequence(this IInputObservable io, double interval)
         {
-            return io.Begin.SelectMany(e =>
+            return io.OnBegin.SelectMany(e =>
                 Observable.Interval(TimeSpan.FromMilliseconds(interval))
                     .First()
                     .Select(_ => e)
-                    .TakeUntil(io.End));
+                    .TakeUntil(io.OnEnd));
         }
 
         public static IObservable<IList<TimeInterval<InputEvent>>> TakeBeforeEndTimeInterval(this IInputObservable io, int count)
@@ -76,8 +76,8 @@ namespace InputObservable
             //     .TakeLast(count)
             //     .Buffer(count)
             //     .RepeatUntilDestroy(io.Context.gameObject);
-            return io.Begin.SelectMany(e =>
-                Observable.Merge(Observable.Return(e), io.Any().TakeUntil(io.End.DelayFrame(1)))
+            return io.OnBegin.SelectMany(e =>
+                Observable.Merge(Observable.Return(e), io.Any().TakeUntil(io.OnEnd.DelayFrame(1)))
                     .TimeInterval()
                     .TakeLast(count)
                     .Buffer(count));
@@ -115,8 +115,8 @@ namespace InputObservable
 
         public static IObservable<Vector2> Difference(this IInputObservable io)
         {
-            return io.Begin.SelectMany(e =>
-                Observable.Merge(Observable.Return(e), io.Any().TakeUntil(io.End.DelayFrame(1)))
+            return io.OnBegin.SelectMany(e =>
+                Observable.Merge(Observable.Return(e), io.Any().TakeUntil(io.OnEnd.DelayFrame(1)))
                     .Buffer(2, 1))
                 .Where(events => events.Count > 1)
                 .Select(events =>
