@@ -74,6 +74,19 @@ public class DrawTargetView : MonoBehaviour
         }
     }
 
+    public void Put(Vector2 pos, Vector2 vec, Color color, string msg)
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(pos), out hit))
+        {
+            var view = Instantiate(pointPrefab, hit.point, Quaternion.identity).GetComponent<PointView>();
+            if (!string.IsNullOrEmpty(msg))
+                view.SetText(msg);
+            view.SetColor(color);
+            view.SetVetor(vec, Color.white);
+        }
+    }
+
     public void DragBegin(InputEvent e, Color color, string msg = null)
     {
         RaycastHit hit;

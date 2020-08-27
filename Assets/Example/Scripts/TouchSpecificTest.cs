@@ -8,13 +8,9 @@ using UniRx;
 using UniRx.Diagnostics;
 using InputObservable;
 
-public class TouchSpecificTest : MonoBehaviour
+public static class TouchFeedback
 {
-    public DrawTargetView draw;
-    public Text text;
-    public Text text2;
-
-    Action<InputEvent> touchDrawHandler(Color c)
+    static Action<InputEvent> touchDrawHandler(DrawTargetView draw, Color c)
     {
         return (InputEvent e) =>
         {
@@ -34,17 +30,46 @@ public class TouchSpecificTest : MonoBehaviour
         };
     }
 
-    void Start()
+    public static List<IInputObservable> Setup(InputObservableContext context, DrawTargetView draw, Component component)
     {
         var ios = new List<IInputObservable>();
+        if (draw == null || component == null)
+        {
+            return ios;
+        }
         var colors = new List<Color> { Color.green, Color.yellow, Color.red, Color.blue, Color.black };
-        var context = this.DefaultInputContext();
         foreach (var (index, color) in colors.Select((color, index) => (index, color)))
         {
-            var io = context.GetObservable(index);
-            io.Any().Subscribe(touchDrawHandler(color)).AddTo(this);
-            ios.Add(io);
+            try
+            {
+                var io = context.GetObservable(index);
+                io.Any().Subscribe(touchDrawHandler(draw, color)).AddTo(component);
+                ios.Add(io);
+            }catch(IndexOutOfRangeException e) {
+                Debug.Log($"{e} ignore");
+                break;
+            }
         }
+        return ios;
+    }
+
+    public static void DrawSwipeArrow(DrawTargetView draw, Vector2 pos, Vector2 vector, string msg)
+    {
+        draw.Put(pos, vector, Color.red, msg);
+    }
+}
+
+public class TouchSpecificTest : MonoBehaviour
+{
+    public DrawTargetView draw;
+    public Text text;
+    public Text text2;
+
+
+    void Start()
+    {
+        var context = this.DefaultInputContext();
+        var ios = TouchFeedback.Setup(context, draw, this);
 
         // Reset by finger release
         Observable.Merge(ios[0].OnEnd, ios[1].OnEnd).Subscribe(_ =>

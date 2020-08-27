@@ -9,6 +9,7 @@ using InputObservable;
 public class ObjectViewer : MonoBehaviour
 {
     public GameObject prefab;
+    public DrawTargetView draw;
     Transform _target;
     Rigidbody _rigidbody;
 
@@ -25,6 +26,7 @@ public class ObjectViewer : MonoBehaviour
     void Start()
     {
         var context = this.DefaultInputContext();
+        TouchFeedback.Setup(context, draw, this);
         var touch0 = context.GetObservable(0);
         var touch1 = context.GetObservable(1);
 
@@ -66,6 +68,14 @@ public class ObjectViewer : MonoBehaviour
                     var torque = average.ToEulerAngle(hratio, vratio) * mag;
                     _rigidbody.AddTorque(torque, ForceMode.VelocityChange);
                     Debug.Log($"magnitude = {mag}, torque={torque}");
+
+                    if (draw != null)
+                    {
+                        TouchFeedback.DrawSwipeArrow(draw,
+                            vs.First().@event.position,
+                            average,
+                            $"{average}, {mag}");
+                    }
                 }
             }).AddTo(this);
 
