@@ -8,7 +8,7 @@ public class PointView : MonoBehaviour
     public TextMesh textMesh;
     MeshRenderer meshRenderer;
     bool vector = false;
-    LineInfo vecInfo;
+    public LineInfo vecInfo;
     bool cross = false;
     LineInfo line1;
     LineInfo line2;

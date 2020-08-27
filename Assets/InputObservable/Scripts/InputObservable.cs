@@ -36,6 +36,20 @@ namespace InputObservable
         public InputEvent @event;
         public Vector2 vector;
         public override string ToString() { return $"<{@event},{vector}>"; }
+
+        public static VerocityInfo Create(TimeInterval<InputEvent> prev, TimeInterval<InputEvent> next)
+        {
+            var elapsed = next.Interval.TotalMilliseconds;
+            return new VerocityInfo
+            {
+                @event = prev.Value,
+                vector = new Vector2
+                {
+                    x = (float)((next.Value.position.x - prev.Value.position.x) / elapsed),
+                    y = (float)((next.Value.position.y - prev.Value.position.y) / elapsed),
+                }
+            };
+        }
     }
 
     public struct MouseWheelEvent

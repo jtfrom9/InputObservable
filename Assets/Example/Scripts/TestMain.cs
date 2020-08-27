@@ -119,13 +119,29 @@ public class TestMain : MonoBehaviour
         {
             draw.Put(e, Color.blue);
         }).AddTo(disposables);
-        io.Verocity(count).Subscribe(vs =>
+
+        io.TakeLastVerocities(count).Subscribe(vs =>
         {
             log(string.Join(", ", vs.Select(vi => vi.ToString())));
             foreach (var v in vs)
             {
                 draw.Put(v, Color.magenta);
             }
+        }).AddTo(disposables);
+    }
+
+    void TraceAllVerocity(IInputObservable io)
+    {
+        io.Any().Subscribe(e =>
+        {
+            Debug.Log(e);
+            draw.Put(e, Color.blue);
+        }).AddTo(disposables);
+
+        io.Verocity().Subscribe(v =>
+        {
+            Debug.Log($">> {v}");
+            draw.Put(v, Color.magenta);
         }).AddTo(disposables);
     }
 
@@ -148,10 +164,12 @@ public class TestMain : MonoBehaviour
                 TraceLongPress(io);
             else if (type == "DragAndDrop")
                 TraceDragAndDrop(io);
-            else if (type == "Verocity4")
+            else if (type == "Last4V")
                 TraceLastVerocity(io, 4);
-            else if (type == "Verocity16")
+            else if (type == "Last16V")
                 TraceLastVerocity(io, 16);
+            else if (type == "Verocity")
+                TraceAllVerocity(io);
             else
                 Debug.LogError($"not found: {type}");
         }).AddTo(this);

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UniRx;
-using UniRx.Diagnostics;
 
 namespace InputObservable
 {
@@ -69,7 +68,7 @@ namespace InputObservable
                     .TakeUntil(io.OnEnd));
         }
 
-        public static IObservable<IList<TimeInterval<InputEvent>>> TakeBeforeEndTimeInterval(this IInputObservable io, int count)
+        public static IObservable<IList<TimeInterval<InputEvent>>> TakeLastTimeIntervalBuffer(this IInputObservable io, int count)
         {
             // return io.Any().TakeUntil(io.End.DelayFrame(1))
             //     .TimeInterval()
@@ -83,34 +82,20 @@ namespace InputObservable
                     .Buffer(count));
         }
 
-        public static IObservable<IList<VerocityInfo>> Verocity(this IObservable<IList<TimeInterval<InputEvent>>> timeSeqIo)
+        public static IObservable<IList<VerocityInfo>> TakeLastVerocities(this IInputObservable io, int count)
         {
-            return timeSeqIo.Select(sequence =>
+            return io.TakeLastTimeIntervalBuffer(count).Select(timeEvents =>
             {
                 var verocities = new List<VerocityInfo>();
-                var prev = sequence.First();
-                for (int i = 1; i < sequence.Count; i++)
+                var prev = timeEvents.First();
+                for (int i = 1; i < timeEvents.Count; i++)
                 {
-                    var t = sequence[i];
-                    var diff = t.Interval.TotalMilliseconds;
-                    verocities.Add(new VerocityInfo()
-                    {
-                        @event = prev.Value,
-                        vector = new Vector2()
-                        {
-                            x = (float)((t.Value.position.x - prev.Value.position.x) / diff),
-                            y = (float)((t.Value.position.y - prev.Value.position.y) / diff),
-                        }
-                    });
+                    var t = timeEvents[i];
+                    verocities.Add(VerocityInfo.Create(prev, t));
                     prev = t;
                 }
                 return verocities;
             });
-        }
-
-        public static IObservable<IList<VerocityInfo>> Verocity(this IInputObservable io, int count)
-        {
-            return io.TakeBeforeEndTimeInterval(count).Verocity();
         }
 
         public static IObservable<Vector2> Difference(this IInputObservable io)
@@ -127,6 +112,23 @@ namespace InputObservable
                         y = events[1].position.y - events[0].position.y
                     };
                 });
+        }
+
+        public static IObservable<VerocityInfo> Verocity(this IInputObservable io)
+        {
+            return io.OnBegin.SelectMany(e =>
+                Observable.Merge(Observable.Return(e), io.Any().TakeUntil(io.OnEnd.DelayFrame(1)))
+                    .TimeInterval()
+                    .Buffer(2, 1))
+                .Where(ts => ts.Count > 1)
+                .Select(ts => VerocityInfo.Create(ts[0], ts[1]));
+        }
+
+        public static IObservable<TimeInterval<InputEvent>> TimeIntervalSequence(this IInputObservable io)
+        {
+            return io.OnBegin.SelectMany(e =>
+                Observable.Merge(Observable.Return(e), io.Any().TakeUntil(io.OnEnd.DelayFrame(1)))
+                    .TimeInterval());
         }
 
         public static Vector3 ToEulerAngle(this Vector2 diff, float horizontal_ratio, float vertical_ratio)
@@ -151,9 +153,5 @@ namespace InputObservable
                     Mathf.Abs(list[0].position.y - list[1].position.y) > delta);
             });
         }
-    }
-
-    public static class IInputTimeListObservableExtension
-    {
     }
 }
