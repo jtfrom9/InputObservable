@@ -16,6 +16,8 @@ namespace InputObservable
             return new MouseInputObservable(behaviour, id, EventSystem.current);
 #elif UNITY_ANDROID || UNITY_IOS
             return new TouchInputObservable(behaviour, id, EventSystem.current);
+#else
+	    return null;
 #endif
         }
     }
