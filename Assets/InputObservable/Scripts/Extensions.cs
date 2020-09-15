@@ -40,7 +40,7 @@ namespace InputObservable
         public static IObservable<Unit> Keep(this IInputObservable io, double interval, Func<bool> pred)
         {
             return io.OnBegin.SelectMany(_ =>
-                Observable.Interval(TimeSpan.FromMilliseconds(100))
+                Observable.Interval(TimeSpan.FromMilliseconds(interval))
                     .TakeUntil(io.OnEnd)
                     .Where(x => pred())
                     .Select(x => Unit.Default));
