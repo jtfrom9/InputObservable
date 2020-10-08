@@ -21,43 +21,41 @@ Providing screen touch / mouse event Rx stream (`IObservable<T>`) and its Extens
     IInputObservableContext context = this.DefaultInputContext();
 
     // Get IInputObservable with id=0, left button for Editor, fingerId=0 for Android/iOS
-    IInputObservable io    = context.GetObservable(0);
+    IInputObservable touch0 = context.GetObservable(0);
 
     // Get IInputObservable with id=1, right button for Editor, fingerId=1 for Android/iOS
-    IInputObservable altio = context.GetObservable(1);
+    IInputObservable touch1 = context.GetObservable(1);
 
     // Draw Point at the location of first touch (or left button clicked)
-    io.OnBegin.Subscribe(e =>
+    touch0.OnBegin.Subscribe(e => // e is InputEvent
     {
-        // e is InputEvent
         DrawPoint(e.position);
     });
 
     // Slide (or dragging) Detection
-    io.OnMoved.Subscribe(e => ...);
+    touch0.OnMoved.Subscribe(e => ...);
 
     // Touch Up (or left button release) detection
-    io.OnEnd.Subscribe(e => ...);
+    touch0.OnEnd.Subscribe(e => ...);
 
     // Any input event
-    io.Any().Subscribe(e => ...);
+    touch0.Any().Subscribe(e => ...);
 
     // Double Tap/click detection during 200 msec
-    io.DoubleSequence(200).Subscribe(e => {})
+    touch0.DoubleSequence(200).Subscribe(e => {})
 
     // Long Touch/press detection over 1000 msec
-    io.LongSequence(1000).Subscribe(e => {})
+    touch0.LongSequence(1000).Subscribe(e => {})
 
     // Slide/Move speed detection between two consecutive points
-    io.Verocity().Subscribe(v =>
+    touch0.Verocity().Subscribe(v => // v is VerocityInfo
     {
-        // v is VerocityInfo
         DrawPoint(v.@event.position);
-        DrawArrow(v.vector)
+        DrawArrow(v.vector); // v.vector is Vector2 per milliseconds
     });
 
     // Slide/Move speed detection between two consecutive points in the last 8 points
-    io.TakeLastVerocities(8).Subscribe(verocities =>
+    touch0.TakeLastVerocities(8).Subscribe(verocities =>
     {
         foreach (var v in verocities) {
             DrawPoint(v.@event.position);
@@ -65,21 +63,30 @@ Providing screen touch / mouse event Rx stream (`IObservable<T>`) and its Extens
         }
     });
 
-    // Rotation event conversion from slide/move operation, 
+    // Rotation event conversion from slide/move operation,
     // at a rate of 90 degrees of slide at both ends of the screen (both up and down and left and right).
-    io.Difference().ToEulerAngle(-90, -90).Subscribe(rot => ...);
+    touch0.Difference().Subscribe(diff =>  // diff is Vector2
+    {
+        var rot = diff.ToEulerAngle(-90.0f / Screen.width, -90.0f / Screen.height);
+        target.Rotate(rot, Space.World);
+    }
+
+    // Differences of the width/height value of the rectangle over time (two consecutive rectangles)
+    // for multi touch pinch operation
+    RectangleObservable.From(touch0, touch1)
+        .PinchSequence()
+        .RepeatUntilDestroy(this)
+        .Subscribe(diff =>  // diff is Vector2
+    {
+        if(diff.x > 0) { /* larger horizontally*/ }
+        else if(diff.x <= 0) { /* smaller horizontally */ }
+        if(diff.y > 0) { /* larger vertically */ }
+        else if(diff.y <= 0) { /* smaller vertically */ }
+    });
 
     // Mouse wheel operation, type check is usefull for shared code between Editor and Android/iOS
     (context as IMouseWheelObservable)?.Wheel.Subscribe(w => {
         // w is MouseWheelEvent
-    });
-
-    // Pinch In/Out
-    RectangleObservable.From(io, altio)
-        .PinchSequence()
-        .RepeatUntilDestroy(this)
-        .Subscribe(diff =>
-    {
     });
 
     // Gyroscope to pose rotation
