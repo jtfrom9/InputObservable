@@ -104,9 +104,8 @@ Providing screen touch / mouse event Rx stream (`IObservable<T>`) and its Extens
 
 ### Install
 
-add below lines to `Packages/manifest.json` in your project.
+install via openupm
 
-```json
-    "com.neuecc.unirx": "https://github.com/neuecc/UniRx.git?path=Assets/Plugins/UniRx/Scripts",
-    "com.jtfrom9.input-observable": "https://github.com/jtfrom9/InputObservable.git?path=Assets/InputObservable"
+```
+    $ openupm add com.jtfrom9.input-observable
 ```
