@@ -1,13 +1,25 @@
 {
     "name": "com.jtfrom9.input-observable",
     "displayName": "Input Observable",
-    "version": "0.1.0",
-    "unity": "2019.4",
     "description": "Input Handling Utility with UniRx",
-    "dependencies": {
-    },
+    "version": "0.1.1",
+    "unity": "2019.4",
     "author": {
         "name": "jtfrom9",
         "email": "jun.tachikawa@gmail.com"
-    }
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jtfrom9/InputObservable.git"
+    },
+    "dependencies": {
+        "com.neuecc.unirx": "7.1.0"
+    },
+    "samples": [
+        {
+            "displayName": "Examples",
+            "description": "Examples using InputObservable",
+            "path": "Example"
+        }
+    ]
 }
