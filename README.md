@@ -1,16 +1,16 @@
 Input Observable: Input Handling Utility with UniRx
 ===
 
-Providing screen touch / mouse event Rx stream (`IObservable<T>`) and its Extensions.
+Providing screen touch / mouse event Rx stream (`IObservable<T>`) and its Operators.
 
-- Common input source abstraction related with a finger or button id (`IInputObservable`) and its manager object (`InputObservableContext`)
-- Gyroscope, Mouse wheel operation also supported (`GyroInputObservable`, `IMouseWheelObservable`)
-- Verious input operation handling supported
+- Input source object (`IInputObservable`) related with a finger or button id and its manager object (`InputObservableContext`)
+- Verious input gesture supported
     - long press (`LongSequence()`)
     - double tap/clik (`DoubleSequence()`)
     - swipe (`Verocity()`, `TakeLastVerocities()`)
-    - pinch in/out (`PinchSequence()`)
-    - rotation conversion (`ToEulerAngle()`)
+    - pinch in/out (`RectangleObservable`, `PinchSequence()`)
+- Rotation conversion (`Differnece()`, `ToEulerAngle()`)
+- Gyroscope, Mouse wheel operation also supported (`GyroInputObservable`, `IMouseWheelObservable`)
 
 ![android](https://user-images.githubusercontent.com/1320102/91451285-3d66df80-e8b8-11ea-9de7-a549bdbd26d3.gif)
 
