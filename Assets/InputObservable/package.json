@@ -2,7 +2,7 @@
     "name": "com.jtfrom9.input-observable",
     "displayName": "Input Observable",
     "description": "Input Handling Utility with UniRx",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "unity": "2019.4",
     "author": {
         "name": "jtfrom9",
@@ -10,5 +10,12 @@
     },
     "dependencies": {
         "com.neuecc.unirx": "7.1.0"
-    }
+    },
+    "samples": [
+        {
+            "displayName": "Samples",
+            "description": "Samples for InputObservable",
+            "path": "Samples~"
+        }
+    ]
 }
